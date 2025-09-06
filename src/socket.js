@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("https://little-papayas-vanish.loca.lt", {
+const socket = io("https://quick-loops-build.loca.lt", {
   withCredentials: true,
 });
 
