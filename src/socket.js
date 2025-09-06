@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("https://quick-loops-build.loca.lt", {
+const socket = io("https://chat-app-backend-u15o.onrender.com", {
   withCredentials: true,
 });
 
