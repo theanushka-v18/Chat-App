@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import homePage from "../assets/home-page.png";
 import { motion } from "motion/react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { login } from "../redux/slices/authSlice";
+import { TbLoader } from "react-icons/tb";
 
 const Login = () => {
   const [userDetails, setUserDetails] = useState({
@@ -12,6 +13,8 @@ const Login = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { isLoading } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
@@ -65,10 +68,17 @@ const Login = () => {
             name="password"
           />
 
+          <div className="forgot-password-text">
+            <Link to={"/forgot-password"}>Forgot password?</Link>
+          </div>
           <div className="auth-btn-links">
             <Link to={"/signup"}>New user? Sign up here</Link>
             <button type="submit" className="primary-button">
-              Sign In
+              {isLoading ? (
+                <TbLoader size={30} className="loader" />
+              ) : (
+                "Sign In"
+              )}
             </button>
           </div>
         </form>

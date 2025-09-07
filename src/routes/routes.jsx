@@ -4,6 +4,8 @@ import Login from "../components/Login";
 import Signup from "../components/Signup";
 import ChatScreen from "../components/ChatScreen";
 import ProtectedRoute from "../components/ProtectedRoute";
+import ForgotPassword from "../components/ForgotPassword";
+import ResetPassword from "../components/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +20,16 @@ export const router = createBrowserRouter([
       {
         path: "/signup",
         element: <Signup />,
+        children: [],
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+        children: [],
+      },
+      {
+        path: "/reset-password/:token",
+        element: <ResetPassword />,
         children: [],
       },
       {

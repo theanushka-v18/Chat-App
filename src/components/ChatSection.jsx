@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import InputSection from "./InputSection";
 import MsgCard from "./MsgCard";
 import { useEffect, useState } from "react";
-import { getChatHistory, incrementUnread } from "../redux/slices/chatSlice";
+import { getChatHistory, incrementUnread, setSelectedUser } from "../redux/slices/chatSlice";
 import socket from "../socket";
 // import { getChatHistory } from "../redux/slices/chatSlice";
 
@@ -27,17 +27,6 @@ const ChatSection = () => {
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      // Update chat state
-      // // ✅ Check if the message is for the currently selected user
-      // if (
-      //   (data.fromUserId === selectedUser && data.toUserId === userData.id) ||
-      //   (data.toUserId === selectedUser && data.fromUserId === userData.id)
-      // ) {
-      //   setChats((prev) => [...prev, data]);
-      // } else {
-      //   dispatch(incrementUnread(data.fromUserId));
-      // }
-    console.log(data, 'data')
       const isCurrentChat =
         (data.sender === selectedUser && data.receiver === userData.id) ||
         (data.receiver === selectedUser && data.sender === userData.id);
@@ -47,6 +36,17 @@ const ChatSection = () => {
       } else {
         // only increment unread for *other* users
         dispatch(incrementUnread(data.sender));
+
+        if(Notification.permission === 'granted') {
+          const notification = new Notification(data.senderName || 'New Message', {
+            body: data.message
+          })
+
+          notification.onclick = () => {
+            window.focus();
+            dispatch(setSelectedUser(data.sender))
+          }
+        }
       }
     });
 
@@ -64,6 +64,7 @@ const ChatSection = () => {
       toUserId: selectedUser,
       message,
       timestamp: new Date().toISOString(),
+      senderName: userData.name
     };
 
     // Emit to socket

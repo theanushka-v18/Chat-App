@@ -33,6 +33,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  position: relative;
 }
 
 .navbar-container h2 {
@@ -99,12 +100,34 @@ button:hover {
   width: 30%;
 }
 
-.form-container form {
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* transparent dark */
+  backdrop-filter: blur(6px); /* 🔹 blur effect */
+  z-index: 999; /* keep it above content */
+}
+
+.change-password-modal {
+  background-color: white;
+  padding: 2rem;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  width: 40%;
+  position: absolute;
+  top: 20%;
+  left: 30%;
+}
+
+.form-container form,
+.change-password-modal form {
   display: flex;
   flex-direction: column;
 }
 
-.form-container label {
+.form-container label,
+.change-password-modal label {
   margin-bottom: 0.5rem;
   font-size: 0.8rem;
   letter-spacing: 1px;
@@ -132,11 +155,13 @@ button:hover {
   justify-content: space-between;
 }
 
-.auth-btn-links a {
+.auth-btn-links a,
+.forgot-password-text a {
   color: var(--primary-button-color);
 }
 
-.auth-btn-links a:active {
+.auth-btn-links a:active,
+.forgot-password-text a:active {
   color: #1062cf;
 }
 
@@ -156,10 +181,10 @@ button:hover {
   background: var(--error-color);
 }
 
-.user-details-container {
+.user-details-modal {
   position: absolute;
   right: 2rem;
-  background-color: whitesmoke;
+  background-color: #fffcfb;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 1rem;
   border-radius: 0.5rem;
@@ -175,6 +200,7 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .chat-screen-container {
@@ -276,6 +302,19 @@ button:hover {
   top: 0.5rem;
   border-radius: 50%;
   font-size: 0.6rem;
+}
+
+.loader {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes slideIn {

@@ -6,7 +6,15 @@ import socket from "../socket.js";
 
 const ChatScreen = () => {
   const { userData } = useSelector((state) => state.auth);
-  
+
+  useEffect(() => {
+    if ("Notification" in Window && Notification.permission === "default") {
+      Notification.requestPermission().then((permission) => {
+        console.log("Notification permission:", permission);
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (userData.id) {
       socket.emit("join", userData.id); // ✅ user joins their room

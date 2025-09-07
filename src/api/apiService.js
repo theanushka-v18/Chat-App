@@ -1,7 +1,10 @@
 import axios from "axios";
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'https://chat-app-backend-u15o.onrender.com/api',
+  baseURL:
+    import.meta.env.VITE_BASE_URL ||
+    "https://chat-app-backend-u15o.onrender.com/api",
+  // baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3000/api',
   headers: {
     "Content-Type": "application/json",
   },
@@ -30,9 +33,13 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const res = await axios.post("https://chat-app-backend-u15o.onrender.com/api/refresh", {
-          withCredentials: true,
-        });
+        const res = await axios.post(
+          "https://chat-app-backend-u15o.onrender.com/api/refresh",
+          {
+            // const res = await axios.post("http://localhost:3000/api/refresh", {
+            withCredentials: true,
+          }
+        );
         const newAccessToken = res.data.accessToken;
 
         // save new token

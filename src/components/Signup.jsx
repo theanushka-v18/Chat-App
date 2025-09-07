@@ -2,14 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import homePage from "../assets/home-page.png";
 import { motion } from "motion/react";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { signup } from "../redux/slices/authSlice";
+import { TbLoader } from "react-icons/tb";
 
 const Signup = () => {
-  // const [fullName, setFullName] = useState("");
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
-
   const [userDetails, setUserDetails] = useState({
     fullName: "",
     email: "",
@@ -17,6 +14,8 @@ const Signup = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { isLoading } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
@@ -78,7 +77,11 @@ const Signup = () => {
           <div className="auth-btn-links">
             <Link to={"/"}>Already a user? Sign in here</Link>
             <button type="submit" className="primary-button">
-              Sign Up
+              {isLoading ? (
+                <TbLoader size={30} className="loader" />
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </div>
         </form>
