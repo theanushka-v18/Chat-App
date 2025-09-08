@@ -4,7 +4,7 @@ import { apiEndPoints } from "../../api/apiEndPoints";
 
 const initialState = {
   allUsers: [],
-  selectedUser: "",
+  selectedUser: null,
   chatHistory: [],
   unreadCounts: {}, // {userId: count}
 };
@@ -12,9 +12,10 @@ const initialState = {
 export const getAllUsers = createAsyncThunk("getAllUsers", async ({ name }) => {
   try {
     const response = await apiClient.post(apiEndPoints.ALL_USERS, { name });
-    return response.data;
+    const { message, users } = response.data;
+    return { message, users };
   } catch (error) {
-    console.error(error.message);
+    throw new Error(error.response.data.message);
   }
 });
 
@@ -26,10 +27,10 @@ export const getChatHistory = createAsyncThunk(
         fromUserId,
         toUserId,
       });
-      const { chats } = response.data;
-      return { chats };
+      const { chats, message } = response.data;
+      return { chats, message };
     } catch (error) {
-      console.error(error.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -55,7 +56,7 @@ const chatSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getAllUsers.fulfilled, (state, action) => {
-        state.allUsers = action.payload;
+        state.allUsers = action.payload.users;
       })
       .addCase(getChatHistory.fulfilled, (state, action) => {
         state.chatHistory = action.payload.chats;

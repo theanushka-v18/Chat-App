@@ -22,13 +22,13 @@ export const signup = createAsyncThunk(
         email,
         password,
       });
-      const { user, accessToken } = response.data;
+      const { user, accessToken, message } = response.data;
 
       // save access token locally
       localStorage.setItem("accessToken", accessToken);
-      return { user, accessToken };
+      return { user, accessToken, message };
     } catch (error) {
-      console.error(error.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -39,19 +39,19 @@ export const login = createAsyncThunk("login", async ({ email, password }) => {
       email,
       password,
     });
-    const { accessToken, user } = response.data;
+    const { accessToken, user, message } = response.data;
 
     // save access token locally
     localStorage.setItem("accessToken", accessToken);
-
-    return { accessToken, user };
+    return { accessToken, user, message };
   } catch (error) {
-    console.error(error.message);
+    throw new Error(error.response.data.message);
   }
 });
 
 export const logout = createAsyncThunk("logout", async () => {
-  await apiClient.post(apiEndPoints.SIGNOUT);
+  const response = await apiClient.post(apiEndPoints.SIGNOUT);
+  const { message } = response.data;
   localStorage.removeItem("accessToken");
 });
 
@@ -59,12 +59,14 @@ export const changePassword = createAsyncThunk(
   "changePassword",
   async ({ currentPassword, newPassword }) => {
     try {
-      await apiClient.post(apiEndPoints.CHANGE_PASSWORD, {
+      const response = await apiClient.post(apiEndPoints.CHANGE_PASSWORD, {
         currentPassword,
         newPassword,
       });
+      const { message } = response.data;
+      return { message };
     } catch (error) {
-      console.error(error.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -73,11 +75,13 @@ export const forgotPassword = createAsyncThunk(
   "forgotPassword",
   async ({ email }) => {
     try {
-      await apiClient.post(apiEndPoints.FORGOT_PASSWORD, {
+      const response = await apiClient.post(apiEndPoints.FORGOT_PASSWORD, {
         email,
       });
+      const { message } = response.data;
+      return { message };
     } catch (error) {
-      console.error(error.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -86,12 +90,14 @@ export const resetPassword = createAsyncThunk(
   "resetPassword",
   async ({ token, newPassword }) => {
     try {
-      await apiClient.post(apiEndPoints.RESET_PASSWORD, {
+      const response = await apiClient.post(apiEndPoints.RESET_PASSWORD, {
         token,
         newPassword,
       });
+      const { message } = response.data;
+      return { message };
     } catch (error) {
-      console.error(error.message);
+      throw new Error(error.response.data.message);
     }
   }
 );

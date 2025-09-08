@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { TbLoader } from "react-icons/tb";
+import { useToast } from "../hooks/useToast";
 
 const Navbar = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -27,6 +28,7 @@ const Navbar = () => {
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleChange = (e) => {
     setChangePasswordDetails({
@@ -42,7 +44,10 @@ const Navbar = () => {
       changePasswordDetails.newPassword !==
       changePasswordDetails.confirmPassword
     ) {
-      console.error("Confirm password should be same as new password");
+      showToast({
+        message: "Confirm password should be same as new password",
+        type: "warning",
+      });
       return;
     }
     dispatch(
@@ -52,6 +57,7 @@ const Navbar = () => {
       })
     ).then((res) => {
       if (res.type === "changePassword/fulfilled") {
+        showToast({ message: res.payload.message, type: "success" });
         dispatch(logout());
         dispatch(logoutReducer());
         navigate("/");
@@ -108,6 +114,10 @@ const Navbar = () => {
                         navigate("/");
                         dispatch(logoutReducer());
                         setIsUserModalOpen(false);
+                        showToast({
+                          message: result.payload.message,
+                          type: "error",
+                        });
                       }
                     }}
                   >
@@ -212,12 +222,6 @@ const Navbar = () => {
           </AnimatePresence>
         </div>
       )}
-      {/* <div className="right-container">
-        <button className="primary-button">
-          <FaUser size={20} />
-          Login
-        </button>
-      </div> */}
     </div>
   );
 };

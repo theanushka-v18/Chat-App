@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { resetPassword } from "../redux/slices/authSlice";
 import { TbLoader } from "react-icons/tb";
+import { useToast } from "../hooks/useToast";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -15,6 +16,8 @@ const ResetPassword = () => {
   });
   const { isLoading } = useSelector((state) => state.auth);
 
+  const { showToast } = useToast();
+
   const handleChange = (e) => {
     setResetPasswordDetails({
       ...resetPasswordDetails,
@@ -24,13 +27,25 @@ const ResetPassword = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (
+      resetPasswordDetails.newPassword !== resetPasswordDetails.confirmPassword
+    ) {
+      showToast({
+        message: "Confirm password should be same as new password",
+        type: "warning",
+      });
+      return;
+    }
     dispatch(
       resetPassword({ token, newPassword: resetPasswordDetails.newPassword })
     ).then((res) => {
-        if(res.type === 'resetPassword/fulfilled') {
-            navigate('/');
-        }
-    })
+      if (res.type === "resetPassword/fulfilled") {
+        navigate("/");
+        showToast({ message: res.payload.message, type: "success" });
+      } else if (res.type === "resetPassword/rejected") {
+        showToast({ message: res.error.message, type: "error" });
+      }
+    });
   };
 
   return (

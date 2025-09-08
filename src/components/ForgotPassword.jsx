@@ -4,6 +4,7 @@ import { TbLoader } from "react-icons/tb";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { forgotPassword } from "../redux/slices/authSlice";
+import { useToast } from "../hooks/useToast";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -11,12 +12,16 @@ const ForgotPassword = () => {
   const { isLoading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { showToast } = useToast();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(forgotPassword({ email })).then((res) => {
       if (res.type === "forgotPassword/fulfilled") {
         setIsEmailSent(true);
+        showToast({ message: res.payload.message, type: "success" });
+      } else if (res.type === "forgotPassword/rejected") {
+        showToast({ message: res.error.message, type: "error" });
       }
     });
   };

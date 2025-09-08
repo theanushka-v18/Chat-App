@@ -4,7 +4,6 @@ import MsgCard from "./MsgCard";
 import { useEffect, useState } from "react";
 import { getChatHistory, incrementUnread, setSelectedUser } from "../redux/slices/chatSlice";
 import socket from "../socket";
-// import { getChatHistory } from "../redux/slices/chatSlice";
 
 const ChatSection = () => {
   const { userData } = useSelector((state) => state.auth);
