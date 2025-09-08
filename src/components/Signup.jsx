@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signup } from "../redux/slices/authSlice";
 import { TbLoader } from "react-icons/tb";
-import { useToast } from "../hooks/useToast";
 
 const Signup = () => {
   const [userDetails, setUserDetails] = useState({
@@ -15,7 +14,6 @@ const Signup = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
   const { isLoading } = useSelector((state) => state.auth);
 
@@ -27,11 +25,7 @@ const Signup = () => {
     e.preventDefault();
     const result = await dispatch(signup(userDetails));
     if (signup.fulfilled.match(result)) {
-      navigate("/chat", {
-        state: { toastMessage: result.payload.message },
-      });
-    } else if (signup.rejected.match(result)) {
-      showToast({ message: result.error.message, type: "error" });
+      navigate("/chat");
     }
   };
 

@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { TbLoader } from "react-icons/tb";
-import { useToast } from "../hooks/useToast";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -28,7 +28,6 @@ const Navbar = () => {
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
   const handleChange = (e) => {
     setChangePasswordDetails({
@@ -44,10 +43,7 @@ const Navbar = () => {
       changePasswordDetails.newPassword !==
       changePasswordDetails.confirmPassword
     ) {
-      showToast({
-        message: "Confirm password should be same as new password",
-        type: "warning",
-      });
+      toast.warning("Confirm password should be same as new password");
       return;
     }
     dispatch(
@@ -57,7 +53,6 @@ const Navbar = () => {
       })
     ).then((res) => {
       if (res.type === "changePassword/fulfilled") {
-        showToast({ message: res.payload.message, type: "success" });
         dispatch(logout());
         dispatch(logoutReducer());
         navigate("/");
@@ -76,11 +71,31 @@ const Navbar = () => {
 
       {isAuthenticated && (
         <div className="right-container">
-          <motion.img
-            onClick={() => setIsUserModalOpen(!isUserModalOpen)}
-            src={userLogo}
-            alt="User Logo"
-          />
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              alignItems: "center",
+              fontSize: "1.2rem",
+              color: "#fffcfb",
+              letterSpacing: "1px",
+            }}
+          >
+            <p>
+              {userData.name
+                .split(" ")
+                .map(
+                  (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                )
+                .join(" ")}
+            </p>
+            <motion.img
+              onClick={() => setIsUserModalOpen(!isUserModalOpen)}
+              src={userLogo}
+              alt="User Logo"
+            />
+          </div>
           <AnimatePresence initial={false}>
             {isUserModalOpen ? (
               <motion.div
@@ -114,10 +129,6 @@ const Navbar = () => {
                         navigate("/");
                         dispatch(logoutReducer());
                         setIsUserModalOpen(false);
-                        showToast({
-                          message: result.payload.message,
-                          type: "error",
-                        });
                       }
                     }}
                   >

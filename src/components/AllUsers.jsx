@@ -5,7 +5,6 @@ import {
   getAllUsers,
   setSelectedUser,
 } from "../redux/slices/chatSlice";
-import { useToast } from "../hooks/useToast";
 
 const AllUsers = () => {
   const dispatch = useDispatch();
@@ -14,16 +13,11 @@ const AllUsers = () => {
   );
   const { userData } = useSelector((state) => state.auth);
 
-  const { showToast } = useToast();
-
   useEffect(() => {
     dispatch(getAllUsers({ name: userData?.name })).then((res) => {
       if (res.type === "getAllUsers/fulfilled") {
-        showToast({ message: res.payload.message, type: "success" });
         dispatch(setSelectedUser(res.payload.users?.[0]?._id));
-      } else if (res.type === "getAllUsers/rejected") {
-        showToast({ message: res.error.message, type: "error" });
-      }
+      } 
     });
   }, [dispatch, userData?.name]);
 
