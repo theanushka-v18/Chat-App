@@ -2,15 +2,20 @@ import { useDispatch, useSelector } from "react-redux";
 import InputSection from "./InputSection";
 import MsgCard from "./MsgCard";
 import { useEffect, useState } from "react";
-import { getChatHistory, incrementUnread, setSelectedUser } from "../redux/slices/chatSlice";
+import {
+  getChatHistory,
+  incrementUnread,
+  setSelectedUser,
+} from "../redux/slices/chatSlice";
 import socket from "../socket";
 
 const ChatSection = () => {
   const { userData } = useSelector((state) => state.auth);
-  const { selectedUser } = useSelector((state) => state.chat);
+  const { selectedUser, allUsers } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
 
   const [chats, setChats] = useState([]);
+  const [typingUser, setTypingUser] = useState(null);
 
   useEffect(() => {
     if (selectedUser) {
@@ -36,15 +41,18 @@ const ChatSection = () => {
         // only increment unread for *other* users
         dispatch(incrementUnread(data.sender));
 
-        if(Notification.permission === 'granted') {
-          const notification = new Notification(data.senderName || 'New Message', {
-            body: data.message
-          })
+        if (Notification.permission === "granted") {
+          const notification = new Notification(
+            data.senderName || "New Message",
+            {
+              body: data.message,
+            }
+          );
 
           notification.onclick = () => {
             window.focus();
-            dispatch(setSelectedUser(data.sender))
-          }
+            dispatch(setSelectedUser(data.sender));
+          };
         }
       }
     });
@@ -53,6 +61,23 @@ const ChatSection = () => {
       socket.off("receive_message");
     };
   }, [selectedUser, userData.id, dispatch]);
+
+  useEffect(() => {
+    socket.on("typing", ({ senderId }) => {
+      setTypingUser(senderId);
+    });
+
+    socket.on("stop_typing", ({ senderId }) => {
+      if (typingUser === senderId) {
+        setTypingUser(null);
+      }
+    });
+
+    return () => {
+      socket.off("typing");
+      socket.off("stop_typing");
+    };
+  }, [allUsers, typingUser]);
 
   // Handle sending new message
   const handleSendMessage = (message) => {
@@ -63,7 +88,7 @@ const ChatSection = () => {
       toUserId: selectedUser,
       message,
       timestamp: new Date().toISOString(),
-      senderName: userData.name
+      senderName: userData.name,
     };
 
     // Emit to socket
@@ -81,6 +106,13 @@ const ChatSection = () => {
             {chats?.map((chat) => {
               return <MsgCard chat={chat} />;
             })}
+            {/* Typing indicator */}
+            {typingUser && (
+              <p style={{ color: "#757fb2" }}>
+                {allUsers.find((u) => u._id === typingUser)?.name || "Someone"}{" "}
+                is typing...
+              </p>
+            )}
           </>
         ) : (
           <h1
