@@ -8,6 +8,7 @@ import {
   setSelectedUser,
 } from "../redux/slices/chatSlice";
 import socket from "../socket";
+import { AnimatePresence, motion } from "motion/react";
 
 const ChatSection = () => {
   const { userData } = useSelector((state) => state.auth);
@@ -16,6 +17,18 @@ const ChatSection = () => {
 
   const [chats, setChats] = useState([]);
   const [typingUser, setTypingUser] = useState(null);
+
+  const dotVariants = {
+    animate: {
+      scale: [0.6, 1, 0.6],
+      opacity: [0.3, 1, 0.3],
+      transition: {
+        duration: 0.8,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
+  };
 
   useEffect(() => {
     if (selectedUser) {
@@ -107,12 +120,45 @@ const ChatSection = () => {
               return <MsgCard chat={chat} />;
             })}
             {/* Typing indicator */}
-            {typingUser && (
+            {/* {typingUser && (
               <p style={{ color: "#757fb2" }}>
                 {allUsers.find((u) => u._id === typingUser)?.name || "Someone"}{" "}
                 is typing...
               </p>
-            )}
+            )} */}
+
+            <AnimatePresence>
+              {typingUser && (
+                <motion.div
+                  className="typing-indicator"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 5 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <span className="typing-text">
+                    {allUsers.find((u) => u._id === typingUser)?.name ||
+                      "Someone"}{" "}
+                    is typing
+                  </span>
+                  <div className="dots">
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="dot"
+                        variants={dotVariants}
+                        animate="animate"
+                        transition={{
+                          delay: i * 0.2, // stagger effect
+                          duration: 0.8,
+                          repeat: Infinity,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </>
         ) : (
           <h1

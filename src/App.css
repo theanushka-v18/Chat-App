@@ -308,6 +308,33 @@ button:hover {
   animation: spin 1.5s linear infinite;
 }
 
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-style: italic;
+  /* color: #555; */
+  color: #757fb2;
+  margin-top: 5px;
+}
+
+.typing-text {
+  margin-right: 5px;
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #757fb2;
+  border-radius: 50%;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
