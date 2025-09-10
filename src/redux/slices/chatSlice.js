@@ -6,6 +6,8 @@ const initialState = {
   allUsers: [],
   selectedUser: null,
   chatHistory: [],
+  isChatLoading: false,
+  isUsersLoading: false,
   unreadCounts: {}, // {userId: count}
 };
 
@@ -55,11 +57,25 @@ const chatSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(getAllUsers.pending, (state) => {
+        state.isUsersLoading = true;
+      })
       .addCase(getAllUsers.fulfilled, (state, action) => {
+        state.isUsersLoading = false;
         state.allUsers = action.payload.users;
+      })
+      .addCase(getAllUsers.rejected, (state) => {
+        state.isUsersLoading = false;
+      })
+      .addCase(getChatHistory.pending, (state) => {
+        state.isChatLoading = true;
       })
       .addCase(getChatHistory.fulfilled, (state, action) => {
         state.chatHistory = action.payload.chats;
+        state.isChatLoading = false;
+      })
+      .addCase(getChatHistory.rejected, (state) => {
+        state.isChatLoading = false;
       });
   },
 });

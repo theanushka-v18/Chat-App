@@ -43,7 +43,9 @@ const Navbar = () => {
       changePasswordDetails.newPassword !==
       changePasswordDetails.confirmPassword
     ) {
-      toast.warning("Confirm password should be same as new password");
+      toast.warning("Confirm password should be same as new password", {
+        autoClose: 1000
+      });
       return;
     }
     dispatch(
@@ -116,7 +118,7 @@ const Navbar = () => {
                   >
                     <RiLockPasswordFill
                       color="whitesmoke"
-                      size={30}
+                      size={20}
                       cursor={"pointer"}
                     />
                     Change Password
@@ -133,12 +135,12 @@ const Navbar = () => {
                     }}
                   >
                     {isLoading ? (
-                      <TbLoader size={30} className="loader" />
+                      <TbLoader size={20} className="loader" />
                     ) : (
                       <>
                         <LuLogOut
                           color="whitesmoke"
-                          size={30}
+                          size={20}
                           cursor={"pointer"}
                         />{" "}
                         Sign out

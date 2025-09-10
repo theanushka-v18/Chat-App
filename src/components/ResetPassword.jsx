@@ -26,9 +26,11 @@ const ResetPassword = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (
-      resetPasswordDetails.newPassword !== resetPasswordDetails.confirmPassword
+      resetPasswordDetails.newPassword !== resetPasswordDetails.confirmNewPassword
     ) {
-      toast.warning("Confirm password should be same as new password");
+      toast.warning("Confirm password should be same as new password", {
+        autoClose: 1000
+      });
       return;
     }
     dispatch(

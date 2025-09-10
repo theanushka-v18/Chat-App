@@ -9,10 +9,14 @@ import {
 } from "../redux/slices/chatSlice";
 import socket from "../socket";
 import { AnimatePresence, motion } from "motion/react";
+import { TbLoader } from "react-icons/tb";
+import ChatShimmerBox from "./ChatShimmerBox";
 
 const ChatSection = () => {
   const { userData } = useSelector((state) => state.auth);
-  const { selectedUser, allUsers } = useSelector((state) => state.chat);
+  const { selectedUser, allUsers, isChatLoading } = useSelector(
+    (state) => state.chat
+  );
   const dispatch = useDispatch();
 
   const [chats, setChats] = useState([]);
@@ -119,13 +123,6 @@ const ChatSection = () => {
             {chats?.map((chat) => {
               return <MsgCard chat={chat} />;
             })}
-            {/* Typing indicator */}
-            {/* {typingUser && (
-              <p style={{ color: "#757fb2" }}>
-                {allUsers.find((u) => u._id === typingUser)?.name || "Someone"}{" "}
-                is typing...
-              </p>
-            )} */}
 
             <AnimatePresence>
               {typingUser && (
@@ -161,19 +158,55 @@ const ChatSection = () => {
             </AnimatePresence>
           </>
         ) : (
-          <h1
-            style={{
-              color: "#757fb2",
-              fontSize: "2.5rem",
-              margin: "auto",
-            }}
-          >
-            Chat history not available
-          </h1>
+          <>
+            {isChatLoading ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                {[1, 2, 3, 4].map((n) => {
+                  return (
+                    <div
+                      style={{
+                        alignSelf: n % 2 === 0 ? "flex-start" : "flex-end",
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <div
+                        style={{
+                          alignSelf: n % 2 === 0 ? "flex-start" : "flex-end",
+                        }}
+                      >
+                        <ChatShimmerBox width="300px" height="30px" />
+                      </div>
+                      <div>
+                        <ChatShimmerBox width="500px" height="30px" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <h1
+                style={{
+                  color: "#757fb2",
+                  fontSize: "2.5rem",
+                  margin: "auto",
+                }}
+              >
+                Chat history not available
+              </h1>
+            )}
+          </>
         )}
       </div>
 
-      <InputSection onSendMessage={handleSendMessage} />
+      <InputSection onSendMessage={handleSendMessage} setChats={setChats} />
     </div>
   );
 };

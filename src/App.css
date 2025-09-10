@@ -57,7 +57,7 @@ button {
   padding: 0.5rem 1rem;
   border-radius: 0.3rem;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1rem;
   transition: all 0.2s ease-in-out;
   display: flex;
   align-items: center;
@@ -206,8 +206,23 @@ button:hover {
 .chat-screen-container {
   margin: auto;
   height: calc(100vh - 5rem);
+  /* background-image: url("../src//assets/bg-img.jpg");
+  background-size: cover; */
   overflow: hidden;
   display: flex;
+}
+/* Add the blurred background via ::before */
+.chat-screen-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("../src/assets/bg-img.jpg");
+  background-position: center;
+  /* filter: blur(1px);  */
+  z-index: -1; /* keep it behind content */
 }
 
 .all-users {
@@ -220,11 +235,16 @@ button:hover {
   overflow-y: auto;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  align-items: center;
 }
 
 .all-users h4 {
   cursor: pointer;
-  padding: 1rem;
+  width: 100%;
+  padding: 0.5rem;
   transition: all 0.2s ease-in-out;
   border-radius: 0.5rem;
   margin-bottom: 0.5rem;
@@ -238,7 +258,7 @@ button:hover {
 
 .chat-section {
   border-top: 1px solid #757fb2;
-  width: 80%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -285,6 +305,7 @@ button:hover {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem 0 0.5rem 0.5rem;
   align-self: flex-end;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .sender-msg-card {
@@ -292,6 +313,7 @@ button:hover {
   width: fit-content;
   padding: 0.5rem 1rem;
   border-radius: 0 0.5rem 0.5rem 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .unread-badge {

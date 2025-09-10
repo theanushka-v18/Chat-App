@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import socket from "../socket.js";
 
-const InputSection = ({ onSendMessage }) => {
+const InputSection = ({ onSendMessage, setChats }) => {
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   let typingTimeout;
   const { selectedUser } = useSelector((state) => state.chat);
   const { userData } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    setMessage("");
+    setChats(null);
+  }, [selectedUser]);
 
   const handleSend = () => {
     if (message.trim() === "") return;
