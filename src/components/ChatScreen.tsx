@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import AllUsers from "./AllUsers";
 import ChatSection from "./ChatSection";
-import { useSelector } from "react-redux";
-import socket from "../socket.js";
+import { useAppSelector } from "../redux/hooks";
+import socket from "../socket";
 
 const ChatScreen = () => {
-  const { userData } = useSelector((state) => state.auth);
+  const { userData } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if ("Notification" in Window && Notification.permission === "default") {
@@ -16,10 +16,10 @@ const ChatScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (userData.id) {
-      socket.emit("join", userData.id); // ✅ user joins their room
+    if (userData?._id) {
+      socket.emit("join", userData._id); // ✅ user joins their room
     }
-  }, [userData.id]);
+  }, [userData?._id]);
 
   return (
     <div className="chat-screen-container">

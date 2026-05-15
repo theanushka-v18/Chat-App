@@ -1,11 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
-import Layout from "../layouts/Layout";
-import Login from "../components/Login";
-import Signup from "../components/Signup";
-import ChatScreen from "../components/ChatScreen";
-import ProtectedRoute from "../components/ProtectedRoute";
-import ForgotPassword from "../components/ForgotPassword";
-import ResetPassword from "../components/ResetPassword";
+import Layout from "../layouts/Layout.js";
+import Login from "../components/Login.js";
+import Signup from "../components/Signup.js";
+import ChatScreen from "../components/ChatScreen.js";
+import ProtectedRoute from "../components/ProtectedRoute.js";
+import ForgotPassword from "../components/ForgotPassword.js";
+import ResetPassword from "../components/ResetPassword.js";
 
 export const router = createBrowserRouter([
   {

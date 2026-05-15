@@ -1,24 +1,25 @@
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import {
   clearUnread,
   getAllUsers,
   setSelectedUser,
-} from "../redux/slices/chatSlice";
-import { TbLoader } from "react-icons/tb";
-import UserShimmerBox from "./UserShimmerBox";
+} from "../redux/slices/chatSlice.js";
+import UserShimmerBox from "./UserShimmerBox.js";
+import type { TUserData } from "../redux/slices/authSlice";
 
 const AllUsers = () => {
-  const dispatch = useDispatch();
-  const { allUsers, selectedUser, unreadCounts, isUsersLoading } = useSelector(
-    (state) => state.chat
-  );
-  const { userData } = useSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { allUsers, selectedUser, unreadCounts, isUsersLoading } =
+    useAppSelector((state) => state.chat);
+  const { userData } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getAllUsers({ name: userData?.name })).then((res) => {
       if (res.type === "getAllUsers/fulfilled") {
-        dispatch(setSelectedUser(res.payload.users?.[0]?._id));
+        dispatch(
+          setSelectedUser((res.payload as { users: TUserData[] }).users?.[0]),
+        );
       }
     });
   }, [dispatch, userData?.name]);
@@ -42,17 +43,20 @@ const AllUsers = () => {
             return (
               <h4
                 style={{
-                  backgroundColor: selectedUser === user._id ? "#fffcfb" : "",
+                  backgroundColor:
+                    selectedUser?._id === user._id ? "#fffcfb" : "",
                   color:
-                    selectedUser === user._id ? "var(--primary-color)" : "",
+                    selectedUser?._id === user._id
+                      ? "var(--primary-color)"
+                      : "",
                 }}
                 onClick={() => {
-                  dispatch(setSelectedUser(user._id));
+                  dispatch(setSelectedUser(user));
                   dispatch(clearUnread(user._id));
                 }}
               >
                 {user.name}
-                {unreadCounts[user._id] > 0 && (
+                {(unreadCounts[user._id] ?? 0) > 0 && (
                   <span className="unread-badge">{unreadCounts[user._id]}</span>
                 )}
               </h4>

@@ -2,11 +2,24 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiEndPoints } from "../../api/apiEndPoints";
 import { apiClient } from "../../api/apiService";
 
-export const initialState = {
+export interface TUserData {
+  email: string;
+  name: string;
+  _id: string;
+}
+
+export interface TAuthState {
+  userData: TUserData | null;
+  isAuthenticated: boolean;
+  accessToken: string | null;
+  isLoading: boolean;
+}
+
+export const initialState: TAuthState = {
   userData: {
     email: "",
     name: "",
-    id: "",
+    _id: "",
   },
   isAuthenticated: false,
   accessToken: "",
@@ -15,7 +28,15 @@ export const initialState = {
 
 export const signup = createAsyncThunk(
   "signup",
-  async ({ fullName, email, password }) => {
+  async ({
+    fullName,
+    email,
+    password,
+  }: {
+    fullName: string;
+    email: string;
+    password: string;
+  }) => {
     try {
       const response = await apiClient.post(apiEndPoints.SIGNUP, {
         name: fullName,
@@ -27,27 +48,30 @@ export const signup = createAsyncThunk(
       // save access token locally
       localStorage.setItem("accessToken", accessToken);
       return { user, accessToken, message };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.response.data.message);
     }
-  }
+  },
 );
 
-export const login = createAsyncThunk("login", async ({ email, password }) => {
-  try {
-    const response = await apiClient.post(apiEndPoints.SIGNIN, {
-      email,
-      password,
-    });
-    const { accessToken, user, message } = response.data;
+export const login = createAsyncThunk(
+  "login",
+  async ({ email, password }: { email: string; password: string }) => {
+    try {
+      const response = await apiClient.post(apiEndPoints.SIGNIN, {
+        email,
+        password,
+      });
+      const { accessToken, user, message } = response.data;
 
-    // save access token locally
-    localStorage.setItem("accessToken", accessToken);
-    return { accessToken, user, message };
-  } catch (error) {
-    throw new Error(error.response.data.message);
-  }
-});
+      // save access token locally
+      localStorage.setItem("accessToken", accessToken);
+      return { accessToken, user, message };
+    } catch (error: any) {
+      throw new Error(error.response.data.message);
+    }
+  },
+);
 
 export const logout = createAsyncThunk("logout", async () => {
   const response = await apiClient.post(apiEndPoints.SIGNOUT);
@@ -57,7 +81,13 @@ export const logout = createAsyncThunk("logout", async () => {
 
 export const changePassword = createAsyncThunk(
   "changePassword",
-  async ({ currentPassword, newPassword }) => {
+  async ({
+    currentPassword,
+    newPassword,
+  }: {
+    currentPassword: string;
+    newPassword: string;
+  }) => {
     try {
       const response = await apiClient.post(apiEndPoints.CHANGE_PASSWORD, {
         currentPassword,
@@ -65,30 +95,36 @@ export const changePassword = createAsyncThunk(
       });
       const { message } = response.data;
       return { message };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.response.data.message);
     }
-  }
+  },
 );
 
 export const forgotPassword = createAsyncThunk(
   "forgotPassword",
-  async ({ email }) => {
+  async ({ email }: { email: string }) => {
     try {
       const response = await apiClient.post(apiEndPoints.FORGOT_PASSWORD, {
         email,
       });
       const { message } = response.data;
       return { message };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.response.data.message);
     }
-  }
+  },
 );
 
 export const resetPassword = createAsyncThunk(
   "resetPassword",
-  async ({ token, newPassword }) => {
+  async ({
+    token,
+    newPassword,
+  }: {
+    token: string | undefined;
+    newPassword: string;
+  }) => {
     try {
       const response = await apiClient.post(apiEndPoints.RESET_PASSWORD, {
         token,
@@ -96,10 +132,10 @@ export const resetPassword = createAsyncThunk(
       });
       const { message } = response.data;
       return { message };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.response.data.message);
     }
-  }
+  },
 );
 
 const authSlice = createSlice({

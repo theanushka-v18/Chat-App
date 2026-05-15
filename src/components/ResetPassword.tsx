@@ -1,40 +1,41 @@
 import { motion } from "motion/react";
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { useNavigate, useParams } from "react-router-dom";
-import { resetPassword } from "../redux/slices/authSlice";
+import { resetPassword } from "../redux/slices/authSlice.js";
 import { TbLoader } from "react-icons/tb";
 import { toast } from "react-toastify";
 
 const ResetPassword = () => {
   const { token } = useParams();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [resetPasswordDetails, setResetPasswordDetails] = useState({
     newPassword: "",
     confirmNewPassword: "",
   });
-  const { isLoading } = useSelector((state) => state.auth);
+  const { isLoading } = useAppSelector((state) => state.auth);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setResetPasswordDetails({
       ...resetPasswordDetails,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (
-      resetPasswordDetails.newPassword !== resetPasswordDetails.confirmNewPassword
+      resetPasswordDetails.newPassword !==
+      resetPasswordDetails.confirmNewPassword
     ) {
       toast.warning("Confirm password should be same as new password", {
-        autoClose: 1000
+        autoClose: 1000,
       });
       return;
     }
     dispatch(
-      resetPassword({ token, newPassword: resetPasswordDetails.newPassword })
+      resetPassword({ token, newPassword: resetPasswordDetails.newPassword }),
     ).then((res) => {
       if (res.type === "resetPassword/fulfilled") {
         navigate("/");

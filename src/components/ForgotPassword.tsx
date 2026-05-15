@@ -1,18 +1,18 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { TbLoader } from "react-icons/tb";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { useNavigate } from "react-router-dom";
-import { forgotPassword } from "../redux/slices/authSlice";
+import { forgotPassword } from "../redux/slices/authSlice.js";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isEmailSent, setIsEmailSent] = useState(false);
-  const { isLoading } = useSelector((state) => state.auth);
+  const { isLoading } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     dispatch(forgotPassword({ email })).then((res) => {
       if (res.type === "forgotPassword/fulfilled") {

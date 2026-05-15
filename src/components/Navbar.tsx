@@ -1,18 +1,18 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import chatAppLogo from "../assets/chat-app-logo.png";
 import userLogo from "../assets/user-logo.png";
 import { AnimatePresence, motion } from "motion/react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { LuLogOut } from "react-icons/lu";
 import {
   changePassword,
   logout,
   logoutReducer,
-} from "../redux/slices/authSlice";
+} from "../redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
 import { RiLockPasswordFill } from "react-icons/ri";
-import { TbLoader } from "react-icons/tb";
 import { toast } from "react-toastify";
+import { TbLoader } from "react-icons/tb";
 
 const Navbar = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -23,20 +23,20 @@ const Navbar = () => {
     confirmPassword: "",
   });
 
-  const { userData, isAuthenticated, isLoading } = useSelector(
-    (state) => state.auth
+  const { userData, isAuthenticated, isLoading } = useAppSelector(
+    (state) => state.auth,
   );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setChangePasswordDetails({
       ...changePasswordDetails,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (
@@ -44,7 +44,7 @@ const Navbar = () => {
       changePasswordDetails.confirmPassword
     ) {
       toast.warning("Confirm password should be same as new password", {
-        autoClose: 1000
+        autoClose: 1000,
       });
       return;
     }
@@ -52,16 +52,23 @@ const Navbar = () => {
       changePassword({
         currentPassword: changePasswordDetails.oldPassword,
         newPassword: changePasswordDetails.newPassword,
-      })
-    ).then((res) => {
-      if (res.type === "changePassword/fulfilled") {
+      }),
+    )
+      .unwrap()
+      .then(() => {
         dispatch(logout());
         dispatch(logoutReducer());
         navigate("/");
         setChangePasswordModal(false);
-        setChangePasswordDetails({});
-      }
-    });
+        setChangePasswordDetails({
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        toast.success("Password changed successfully! Please login again", {
+          autoClose: 1000,
+        });
+      });
   };
 
   return (
@@ -84,11 +91,11 @@ const Navbar = () => {
             }}
           >
             <p>
-              {userData.name
+              {userData?.name
                 .split(" ")
                 .map(
                   (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
                 )
                 .join(" ")}
             </p>
@@ -106,8 +113,8 @@ const Navbar = () => {
                 exit={{ opacity: 0, scale: 0 }}
                 className="user-details-modal"
               >
-                <p className="user-data-text">{userData.name}</p>
-                <p className="user-data-text">{userData.email}</p>
+                <p className="user-data-text">{userData?.name}</p>
+                <p className="user-data-text">{userData?.email}</p>
                 <div className="user-data-btn-container">
                   <button
                     className="primary-button"
@@ -162,7 +169,11 @@ const Navbar = () => {
                   exit={{ opacity: 0 }}
                   onClick={() => {
                     setChangePasswordModal(false);
-                    setChangePasswordDetails({});
+                    setChangePasswordDetails({
+                      oldPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
+                    });
                   }} // close on backdrop click
                 />
                 <motion.div
@@ -222,7 +233,11 @@ const Navbar = () => {
                         className="secondary-button"
                         onClick={() => {
                           setChangePasswordModal(false);
-                          setChangePasswordDetails({});
+                          setChangePasswordDetails({
+                            oldPassword: "",
+                            newPassword: "",
+                            confirmPassword: "",
+                          });
                         }}
                       >
                         Cancel

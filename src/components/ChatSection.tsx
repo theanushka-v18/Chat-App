@@ -1,28 +1,29 @@
-import { useDispatch, useSelector } from "react-redux";
-import InputSection from "./InputSection";
-import MsgCard from "./MsgCard";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import InputSection from "./InputSection.js";
+import MsgCard from "./MsgCard.js";
 import { useEffect, useState } from "react";
 import {
   getChatHistory,
   incrementUnread,
   setSelectedUser,
-} from "../redux/slices/chatSlice";
-import socket from "../socket";
-import { AnimatePresence, motion } from "motion/react";
+  type TChatMessage,
+} from "../redux/slices/chatSlice.js";
+import socket from "../socket.js";
+import { AnimatePresence, motion, type Variants } from "motion/react";
 import { TbLoader } from "react-icons/tb";
-import ChatShimmerBox from "./ChatShimmerBox";
+import ChatShimmerBox from "./ChatShimmerBox.js";
 
 const ChatSection = () => {
-  const { userData } = useSelector((state) => state.auth);
-  const { selectedUser, allUsers, isChatLoading } = useSelector(
-    (state) => state.chat
+  const { userData } = useAppSelector((state) => state.auth);
+  const { selectedUser, allUsers, isChatLoading } = useAppSelector(
+    (state) => state.chat,
   );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState<TChatMessage[]>([]);
   const [typingUser, setTypingUser] = useState(null);
 
-  const dotVariants = {
+  const dotVariants: Variants = {
     animate: {
       scale: [0.6, 1, 0.6],
       opacity: [0.3, 1, 0.3],
@@ -35,22 +36,28 @@ const ChatSection = () => {
   };
 
   useEffect(() => {
-    if (selectedUser) {
+    if (selectedUser && userData?._id) {
       dispatch(
-        getChatHistory({ fromUserId: userData.id, toUserId: selectedUser })
-      ).then((res) => {
-        if (res?.payload?.chats) {
-          setChats(res.payload.chats); // initialize local chats with history
-        }
-      });
+        getChatHistory({
+          fromUserId: userData._id,
+          toUserId: selectedUser._id,
+        }),
+      )
+        .unwrap()
+        .then((payload) => {
+          if (payload.chats) {
+            setChats(payload.chats); // initialize local chats with history
+          }
+        });
     }
   }, [userData, selectedUser]);
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
       const isCurrentChat =
-        (data.sender === selectedUser && data.receiver === userData.id) ||
-        (data.receiver === selectedUser && data.sender === userData.id);
+        (data.sender === selectedUser?._id &&
+          data.receiver === userData?._id) ||
+        (data.receiver === selectedUser?._id && data.sender === userData?._id);
 
       if (isCurrentChat) {
         setChats((prev) => [...prev, data]);
@@ -63,12 +70,15 @@ const ChatSection = () => {
             data.senderName || "New Message",
             {
               body: data.message,
-            }
+            },
           );
 
           notification.onclick = () => {
             window.focus();
-            dispatch(setSelectedUser(data.sender));
+            const senderUser = allUsers.find((u) => u._id === data.sender);
+            if (senderUser) {
+              dispatch(setSelectedUser(senderUser));
+            }
           };
         }
       }
@@ -77,7 +87,7 @@ const ChatSection = () => {
     return () => {
       socket.off("receive_message");
     };
-  }, [selectedUser, userData.id, dispatch]);
+  }, [selectedUser, userData?._id, dispatch, allUsers]);
 
   useEffect(() => {
     socket.on("typing", ({ senderId }) => {
@@ -97,15 +107,15 @@ const ChatSection = () => {
   }, [allUsers, typingUser]);
 
   // Handle sending new message
-  const handleSendMessage = (message) => {
+  const handleSendMessage = (message: string) => {
     if (!message.trim() || !selectedUser) return;
 
     const payload = {
-      fromUserId: userData.id,
-      toUserId: selectedUser,
+      fromUserId: userData?._id,
+      toUserId: selectedUser?._id,
       message,
       timestamp: new Date().toISOString(),
-      senderName: userData.name,
+      senderName: userData?.name,
     };
 
     // Emit to socket

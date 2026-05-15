@@ -1,8 +1,26 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiClient } from "../../api/apiService";
 import { apiEndPoints } from "../../api/apiEndPoints";
+import type { TUserData } from "./authSlice";
 
-const initialState = {
+export interface TChatMessage {
+  sender?: string;
+  receiver?: string;
+  message?: string;
+  timestamp?: string;
+  [key: string]: any;
+}
+
+export interface TChatState {
+  allUsers: TUserData[];
+  selectedUser: TUserData | null;
+  chatHistory: TChatMessage[];
+  isChatLoading: boolean;
+  isUsersLoading: boolean;
+  unreadCounts: Record<string, number>; // {userId: count}
+}
+
+const initialState: TChatState = {
   allUsers: [],
   selectedUser: null,
   chatHistory: [],
@@ -11,19 +29,31 @@ const initialState = {
   unreadCounts: {}, // {userId: count}
 };
 
-export const getAllUsers = createAsyncThunk("getAllUsers", async ({ name }) => {
-  try {
-    const response = await apiClient.post(apiEndPoints.ALL_USERS, { name });
-    const { message, users } = response.data;
-    return { message, users };
-  } catch (error) {
-    throw new Error(error.response.data.message);
-  }
-});
+export const getAllUsers = createAsyncThunk<
+  { message: string; users: TUserData[] },
+  { name: string | undefined }
+>(
+  "getAllUsers",
+  async ({ name }) => {
+    try {
+      const response = await apiClient.post(apiEndPoints.ALL_USERS, { name });
+      const { message, users } = response.data;
+      return { message, users };
+    } catch (error: any) {
+      throw new Error(error.response.data.message);
+    }
+  },
+);
 
-export const getChatHistory = createAsyncThunk(
+export const getChatHistory = createAsyncThunk<
+  { chats: TChatMessage[]; message: string },
+  { fromUserId: string; toUserId: string }
+>(
   "getChatHistory",
-  async ({ fromUserId, toUserId }) => {
+  async ({
+    fromUserId,
+    toUserId,
+  }) => {
     try {
       const response = await apiClient.post(apiEndPoints.GET_CHAT_HISTORY, {
         fromUserId,
@@ -31,10 +61,10 @@ export const getChatHistory = createAsyncThunk(
       });
       const { chats, message } = response.data;
       return { chats, message };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.response.data.message);
     }
-  }
+  },
 );
 
 const chatSlice = createSlice({
@@ -52,7 +82,9 @@ const chatSlice = createSlice({
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
       // clear unread when switching to this chat
-      state.unreadCounts[action.payload] = 0;
+      if (action.payload) {
+        state.unreadCounts[action.payload._id] = 0;
+      }
     },
   },
   extraReducers: (builder) => {

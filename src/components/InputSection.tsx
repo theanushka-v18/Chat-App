@@ -2,17 +2,25 @@ import { useEffect, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import socket from "../socket.js";
+import type { RootState } from "../redux/store.js";
+import type { TChatMessage } from "../redux/slices/chatSlice.js";
 
-const InputSection = ({ onSendMessage, setChats }) => {
+const InputSection = ({
+  onSendMessage,
+  setChats,
+}: {
+  onSendMessage: (message: string) => void;
+  setChats: React.Dispatch<React.SetStateAction<TChatMessage[]>>;
+}) => {
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  let typingTimeout;
-  const { selectedUser } = useSelector((state) => state.chat);
-  const { userData } = useSelector((state) => state.auth);
+  let typingTimeout: number | undefined;
+  const { selectedUser } = useSelector((state: RootState) => state.chat);
+  const { userData } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     setMessage("");
-    setChats(null);
+    setChats([]);
   }, [selectedUser]);
 
   const handleSend = () => {
@@ -33,8 +41,8 @@ const InputSection = ({ onSendMessage, setChats }) => {
           if (!isTyping) {
             setIsTyping(true);
             socket.emit("typing", {
-              senderId: userData.id,
-              receiverId: selectedUser,
+              senderId: userData?._id,
+              receiverId: selectedUser?._id,
             });
           }
 
@@ -43,8 +51,8 @@ const InputSection = ({ onSendMessage, setChats }) => {
           typingTimeout = setTimeout(() => {
             setIsTyping(false);
             socket.emit("stop_typing", {
-              senderId: userData.id,
-              receiverId: selectedUser,
+              senderId: userData?._id,
+              receiverId: selectedUser?._id,
             });
           }, 1000);
         }}

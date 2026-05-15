@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import homePage from "../assets/home-page.png";
 import { motion } from "motion/react";
-import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
-import { login } from "../redux/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import React, { useState } from "react";
+import { login } from "../redux/slices/authSlice.js";
 import { TbLoader } from "react-icons/tb";
 
 const Login = () => {
@@ -11,22 +11,22 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { isLoading } = useSelector((state) => state.auth);
+  const { isLoading } = useAppSelector((state) => state.auth);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = await dispatch(login(userDetails));
 
     if (login.fulfilled.match(result)) {
       navigate("/chat");
-    } 
+    }
   };
   return (
     <div className="auth-container">
