@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import chatAppLogo from "../assets/chat-app-logo.png";
-import userLogo from "../assets/user-logo.png";
+import chatAppLogo from "@assets/chat-app-logo.png";
+import userLogo from "@assets/user-logo.png";
 import { AnimatePresence, motion } from "motion/react";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { LuLogOut } from "react-icons/lu";
 import {
   changePassword,
   logout,
   logoutReducer,
-} from "../redux/slices/authSlice.js";
+} from "@modules/auth/redux/authSlice.js";
 import { useNavigate } from "react-router-dom";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { toast } from "react-toastify";

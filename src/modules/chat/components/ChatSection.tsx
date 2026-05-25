@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import InputSection from "./InputSection.js";
 import MsgCard from "./MsgCard.js";
 import { useEffect, useState } from "react";
@@ -7,8 +7,8 @@ import {
   incrementUnread,
   setSelectedUser,
   type TChatMessage,
-} from "../redux/slices/chatSlice.js";
-import socket from "../socket.js";
+} from "@modules/chat/redux/chatSlice.js";
+import socket from "@services/socket.js";
 import { AnimatePresence, motion, type Variants } from "motion/react";
 import { TbLoader } from "react-icons/tb";
 import ChatShimmerBox from "./ChatShimmerBox.js";

@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./slices/authSlice";
-import chatReducer from "./slices/chatSlice";
-import { toastMiddleware } from "../middlewares/toastMiddleware";
+import authReducer from "@modules/auth/redux/authSlice";
+import chatReducer from "@modules/chat/redux/chatSlice";
+import { toastMiddleware } from "@middlewares/toastMiddleware";
 
 export const store = configureStore({
   reducer: {

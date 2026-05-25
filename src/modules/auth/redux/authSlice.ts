@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiEndPoints } from "../../api/apiEndPoints";
-import { apiClient } from "../../api/apiService";
+import { apiClient } from "@services/apiService";
+import { authEndpoints } from "@modules/auth/api/authEndpoints";
 
 export interface TUserData {
   email: string;
@@ -38,7 +38,7 @@ export const signup = createAsyncThunk(
     password: string;
   }) => {
     try {
-      const response = await apiClient.post(apiEndPoints.SIGNUP, {
+      const response = await apiClient.post(authEndpoints.SIGNUP, {
         name: fullName,
         email,
         password,
@@ -58,7 +58,7 @@ export const login = createAsyncThunk(
   "login",
   async ({ email, password }: { email: string; password: string }) => {
     try {
-      const response = await apiClient.post(apiEndPoints.SIGNIN, {
+      const response = await apiClient.post(authEndpoints.SIGNIN, {
         email,
         password,
       });
@@ -74,7 +74,7 @@ export const login = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk("logout", async () => {
-  const response = await apiClient.post(apiEndPoints.SIGNOUT);
+  const response = await apiClient.post(authEndpoints.SIGNOUT);
   const { message } = response.data;
   localStorage.removeItem("accessToken");
 });
@@ -89,7 +89,7 @@ export const changePassword = createAsyncThunk(
     newPassword: string;
   }) => {
     try {
-      const response = await apiClient.post(apiEndPoints.CHANGE_PASSWORD, {
+      const response = await apiClient.post(authEndpoints.CHANGE_PASSWORD, {
         currentPassword,
         newPassword,
       });
@@ -105,7 +105,7 @@ export const forgotPassword = createAsyncThunk(
   "forgotPassword",
   async ({ email }: { email: string }) => {
     try {
-      const response = await apiClient.post(apiEndPoints.FORGOT_PASSWORD, {
+      const response = await apiClient.post(authEndpoints.FORGOT_PASSWORD, {
         email,
       });
       const { message } = response.data;
@@ -126,7 +126,7 @@ export const resetPassword = createAsyncThunk(
     newPassword: string;
   }) => {
     try {
-      const response = await apiClient.post(apiEndPoints.RESET_PASSWORD, {
+      const response = await apiClient.post(authEndpoints.RESET_PASSWORD, {
         token,
         newPassword,
       });

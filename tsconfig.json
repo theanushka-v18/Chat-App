@@ -1,6 +1,18 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@layouts/*": ["./src/layouts/*"],
+      "@routes/*": ["./src/routes/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@services/*": ["./src/services/*"],
+      "@redux/*": ["./src/redux/*"],
+      "@middlewares/*": ["./src/middlewares/*"],
+      "@assets/*": ["./src/assets/*"]
+    },
     // File Layout
     // "rootDir": "./src",
     // "outDir": "./dist",

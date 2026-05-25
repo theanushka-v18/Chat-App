@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiClient } from "../../api/apiService";
-import { apiEndPoints } from "../../api/apiEndPoints";
-import type { TUserData } from "./authSlice";
+import { apiClient } from "@services/apiService";
+import { chatEndpoints } from "@modules/chat/api/chatEndpoints";
+import type { TUserData } from "@modules/auth/redux/authSlice";
 
 export interface TChatMessage {
   sender?: string;
@@ -36,7 +36,7 @@ export const getAllUsers = createAsyncThunk<
   "getAllUsers",
   async ({ name }) => {
     try {
-      const response = await apiClient.post(apiEndPoints.ALL_USERS, { name });
+      const response = await apiClient.post(chatEndpoints.ALL_USERS, { name });
       const { message, users } = response.data;
       return { message, users };
     } catch (error: any) {
@@ -55,7 +55,7 @@ export const getChatHistory = createAsyncThunk<
     toUserId,
   }) => {
     try {
-      const response = await apiClient.post(apiEndPoints.GET_CHAT_HISTORY, {
+      const response = await apiClient.post(chatEndpoints.GET_CHAT_HISTORY, {
         fromUserId,
         toUserId,
       });

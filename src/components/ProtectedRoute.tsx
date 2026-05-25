@@ -1,9 +1,9 @@
 // src/components/ProtectedRoute.tsx
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { setIsAuthenticated } from "../redux/slices/authSlice.js";
+import { setIsAuthenticated } from "@modules/auth/redux/authSlice.js";
 import type React from "react";
-import type { RootState } from "../redux/store.js";
+import type { RootState } from "@redux/store.js";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch();

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import AllUsers from "./AllUsers";
-import ChatSection from "./ChatSection";
-import { useAppSelector } from "../redux/hooks";
-import socket from "../socket";
+import AllUsers from "../components/AllUsers";
+import ChatSection from "../components/ChatSection";
+import { useAppSelector } from "@redux/hooks";
+import socket from "@services/socket";
 
 const ChatScreen = () => {
   const { userData } = useAppSelector((state) => state.auth);

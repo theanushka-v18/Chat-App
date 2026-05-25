@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import {
   clearUnread,
   getAllUsers,
   setSelectedUser,
-} from "../redux/slices/chatSlice.js";
+} from "@modules/chat/redux/chatSlice.js";
 import UserShimmerBox from "./UserShimmerBox.js";
-import type { TUserData } from "../redux/slices/authSlice";
+import type { TUserData } from "@modules/auth/redux/authSlice";
 
 const AllUsers = () => {
   const dispatch = useAppDispatch();

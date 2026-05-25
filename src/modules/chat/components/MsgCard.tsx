@@ -1,5 +1,5 @@
-import { useAppSelector } from "../redux/hooks";
-import type { TChatMessage } from "../redux/slices/chatSlice";
+import { useAppSelector } from "@redux/hooks";
+import type { TChatMessage } from "@modules/chat/redux/chatSlice";
 
 const MsgCard = ({ chat }: { chat: TChatMessage }) => {
   const { userData } = useAppSelector((state) => state.auth);

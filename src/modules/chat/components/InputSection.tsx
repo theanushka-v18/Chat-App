@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { useSelector } from "react-redux";
-import socket from "../socket.js";
-import type { RootState } from "../redux/store.js";
-import type { TChatMessage } from "../redux/slices/chatSlice.js";
+import socket from "@services/socket.js";
+import type { RootState } from "@redux/store.js";
+import type { TChatMessage } from "@modules/chat/redux/chatSlice.js";
 
 const InputSection = ({
   onSendMessage,

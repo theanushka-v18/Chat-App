@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
 import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { useNavigate, useParams } from "react-router-dom";
-import { resetPassword } from "../redux/slices/authSlice.js";
+import { resetPassword } from "@modules/auth/redux/authSlice.js";
 import { TbLoader } from "react-icons/tb";
 import { toast } from "react-toastify";
 

@@ -1,9 +1,9 @@
 import { motion } from "motion/react";
 import React, { useState } from "react";
 import { TbLoader } from "react-icons/tb";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { useNavigate } from "react-router-dom";
-import { forgotPassword } from "../redux/slices/authSlice.js";
+import { forgotPassword } from "@modules/auth/redux/authSlice.js";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");

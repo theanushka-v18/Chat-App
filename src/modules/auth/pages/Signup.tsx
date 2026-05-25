@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import homePage from "../assets/home-page.png";
+import homePage from "@assets/home-page.png";
 import { motion } from "motion/react";
 import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import { signup } from "../redux/slices/authSlice.js";
+import { useAppDispatch, useAppSelector } from "@redux/hooks";
+import { signup } from "@modules/auth/redux/authSlice.js";
 import { TbLoader } from "react-icons/tb";
 
 const Signup = () => {
