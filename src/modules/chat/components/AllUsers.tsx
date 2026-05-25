@@ -4,8 +4,8 @@ import {
   clearUnread,
   getAllUsers,
   setSelectedUser,
-} from "@modules/chat/redux/chatSlice.js";
-import UserShimmerBox from "./UserShimmerBox.js";
+} from "@modules/chat/redux/chatSlice";
+import UserShimmerBox from "./UserShimmerBox";
 import type { TUserData } from "@modules/auth/redux/authSlice";
 
 const AllUsers = () => {

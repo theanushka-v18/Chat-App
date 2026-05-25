@@ -3,8 +3,9 @@ import homePage from "@assets/home-page.png";
 import { motion } from "motion/react";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
-import { signup } from "@modules/auth/redux/authSlice.js";
+import { signup } from "@modules/auth/redux/authSlice";
 import { TbLoader } from "react-icons/tb";
+import { RoutePaths } from "@/api/RoutePaths";
 
 const Signup = () => {
   const [userDetails, setUserDetails] = useState({
@@ -25,7 +26,7 @@ const Signup = () => {
     e.preventDefault();
     const result = await dispatch(signup(userDetails));
     if (signup.fulfilled.match(result)) {
-      navigate("/chat");
+      navigate(RoutePaths.CHAT);
     }
   };
 
@@ -75,7 +76,7 @@ const Signup = () => {
           />
 
           <div className="auth-btn-links">
-            <Link to={"/"}>Already a user? Sign in here</Link>
+            <Link to={RoutePaths.LOGIN}>Already a user? Sign in here</Link>
             <button type="submit" className="primary-button">
               {isLoading ? (
                 <TbLoader size={30} className="loader" />

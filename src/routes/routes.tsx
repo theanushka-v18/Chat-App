@@ -1,13 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
-import Layout from "@layouts/Layout.js";
-import Login from "@modules/auth/pages/Login.js";
-import Signup from "@modules/auth/pages/Signup.js";
-import ChatScreen from "@modules/chat/pages/ChatScreen.js";
-import ProtectedRoute from "@components/ProtectedRoute.js";
-import ForgotPassword from "@modules/auth/pages/ForgotPassword.js";
-import ResetPassword from "@modules/auth/pages/ResetPassword.js";
-import { ChatRoutePaths } from "@/modules/chat/api/routePaths";
-import { AuthRoutePaths } from "@/modules/auth/api/routePaths";
+import Layout from "@layouts/Layout";
+import Login from "@modules/auth/pages/Login";
+import Signup from "@modules/auth/pages/Signup";
+import ChatScreen from "@modules/chat/pages/ChatScreen";
+import ProtectedRoute from "@components/ProtectedRoute";
+import ForgotPassword from "@modules/auth/pages/ForgotPassword";
+import ResetPassword from "@modules/auth/pages/ResetPassword";
+import { RoutePaths } from "@/api/RoutePaths";
 
 export const router = createBrowserRouter([
   {
@@ -15,27 +14,27 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: AuthRoutePaths.LOGIN,
+        path: RoutePaths.LOGIN,
         element: <Login />,
         children: [],
       },
       {
-        path: AuthRoutePaths.SIGNUP,
+        path: RoutePaths.SIGNUP,
         element: <Signup />,
         children: [],
       },
       {
-        path: AuthRoutePaths.FORGOT_PASSWORD,
+        path: RoutePaths.FORGOT_PASSWORD,
         element: <ForgotPassword />,
         children: [],
       },
       {
-        path: AuthRoutePaths.RESET_PASSWORD,
+        path: RoutePaths.RESET_PASSWORD,
         element: <ResetPassword />,
         children: [],
       },
       {
-        path: ChatRoutePaths.CHAT,
+        path: RoutePaths.CHAT,
         element: (
           <ProtectedRoute>
             <ChatScreen />

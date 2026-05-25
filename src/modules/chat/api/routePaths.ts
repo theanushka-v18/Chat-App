@@ -1,3 +1,3 @@
-export const ChatRoutePaths = {
+export const chatRoutePaths = {
   CHAT: "/chat",
 };

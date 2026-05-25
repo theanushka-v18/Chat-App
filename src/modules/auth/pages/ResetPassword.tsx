@@ -2,9 +2,10 @@ import { motion } from "motion/react";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { useNavigate, useParams } from "react-router-dom";
-import { resetPassword } from "@modules/auth/redux/authSlice.js";
+import { resetPassword } from "@modules/auth/redux/authSlice";
 import { TbLoader } from "react-icons/tb";
 import { toast } from "react-toastify";
+import { RoutePaths } from "@/api/RoutePaths";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -38,7 +39,7 @@ const ResetPassword = () => {
       resetPassword({ token, newPassword: resetPasswordDetails.newPassword }),
     ).then((res) => {
       if (res.type === "resetPassword/fulfilled") {
-        navigate("/");
+        navigate(RoutePaths.LOGIN);
       }
     });
   };
@@ -87,7 +88,7 @@ const ResetPassword = () => {
             <button
               type="button"
               className="secondary-button"
-              onClick={() => navigate("/")}
+              onClick={() => navigate(RoutePaths.LOGIN)}
             >
               Cancel
             </button>

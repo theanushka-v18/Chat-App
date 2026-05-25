@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { TbLoader } from "react-icons/tb";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { useNavigate } from "react-router-dom";
-import { forgotPassword } from "@modules/auth/redux/authSlice.js";
+import { forgotPassword } from "@modules/auth/redux/authSlice";
+import { RoutePaths } from "@/api/RoutePaths";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -58,7 +59,7 @@ const ForgotPassword = () => {
               <button
                 type="button"
                 className="secondary-button"
-                onClick={() => navigate("/")}
+                onClick={() => navigate(RoutePaths.LOGIN)}
               >
                 Cancel
               </button>

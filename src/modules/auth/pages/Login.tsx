@@ -3,8 +3,9 @@ import homePage from "@assets/home-page.png";
 import { motion } from "motion/react";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import React, { useState } from "react";
-import { login } from "@modules/auth/redux/authSlice.js";
+import { login } from "@modules/auth/redux/authSlice";
 import { TbLoader } from "react-icons/tb";
+import { RoutePaths } from "@/api/RoutePaths";
 
 const Login = () => {
   const [userDetails, setUserDetails] = useState({
@@ -25,7 +26,7 @@ const Login = () => {
     const result = await dispatch(login(userDetails));
 
     if (login.fulfilled.match(result)) {
-      navigate("/chat");
+      navigate(RoutePaths.CHAT);
     }
   };
   return (
@@ -69,10 +70,10 @@ const Login = () => {
           />
 
           <div className="forgot-password-text">
-            <Link to={"/forgot-password"}>Forgot password?</Link>
+            <Link to={RoutePaths.FORGOT_PASSWORD}>Forgot password?</Link>
           </div>
           <div className="auth-btn-links">
-            <Link to={"/signup"}>New user? Sign up here</Link>
+            <Link to={RoutePaths.SIGNUP}>New user? Sign up here</Link>
             <button type="submit" className="primary-button">
               {isLoading ? (
                 <TbLoader size={30} className="loader" />

@@ -8,11 +8,12 @@ import {
   changePassword,
   logout,
   logoutReducer,
-} from "@modules/auth/redux/authSlice.js";
+} from "@modules/auth/redux/authSlice";
 import { useNavigate } from "react-router-dom";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { toast } from "react-toastify";
 import { TbLoader } from "react-icons/tb";
+import { RoutePaths } from "@/api/RoutePaths";
 
 const Navbar = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -58,7 +59,7 @@ const Navbar = () => {
       .then(() => {
         dispatch(logout());
         dispatch(logoutReducer());
-        navigate("/");
+        navigate(RoutePaths.LOGIN);
         setChangePasswordModal(false);
         setChangePasswordDetails({
           oldPassword: "",
@@ -135,7 +136,7 @@ const Navbar = () => {
                     onClick={async () => {
                       const result = await dispatch(logout());
                       if (logout.fulfilled.match(result)) {
-                        navigate("/");
+                        navigate(RoutePaths.LOGIN);
                         dispatch(logoutReducer());
                         setIsUserModalOpen(false);
                       }
