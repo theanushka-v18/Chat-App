@@ -1,4 +1,4 @@
 export const chatEndpoints = {
-  ALL_USERS: "/all-users",
+  ALL_USERS: "/users",
   GET_CHAT_HISTORY: "/chat-history",
 };
