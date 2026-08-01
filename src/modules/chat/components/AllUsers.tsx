@@ -33,31 +33,30 @@ const AllUsers = () => {
             width: "100%",
           }}
         >
-          {[1, 2, 3, 4, 5].map(() => {
-            return <UserShimmerBox width="100%" height="30px" />;
+          {[1, 2, 3, 4, 5].map((i) => {
+            return <UserShimmerBox key={i} width="100%" height="30px" />;
           })}
         </div>
       ) : (
         <>
-          {allUsers?.map((user) => {
+          {allUsers?.map((user, idx) => {
             return (
               <h4
+                key={idx}
                 style={{
                   backgroundColor:
-                    selectedUser?._id === user._id ? "#fffcfb" : "",
+                    selectedUser?.id === user.id ? "#fffcfb" : "",
                   color:
-                    selectedUser?._id === user._id
-                      ? "var(--primary-color)"
-                      : "",
+                    selectedUser?.id === user.id ? "var(--primary-color)" : "",
                 }}
                 onClick={() => {
                   dispatch(setSelectedUser(user));
-                  dispatch(clearUnread(user._id));
+                  dispatch(clearUnread(user.id));
                 }}
               >
                 {user.name}
-                {(unreadCounts[user._id] ?? 0) > 0 && (
-                  <span className="unread-badge">{unreadCounts[user._id]}</span>
+                {(unreadCounts[user.id] ?? 0) > 0 && (
+                  <span className="unread-badge">{unreadCounts[user.id]}</span>
                 )}
               </h4>
             );

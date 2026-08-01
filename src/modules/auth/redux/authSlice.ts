@@ -5,7 +5,7 @@ import { authEndpoints } from "@modules/auth/api/authEndpoints";
 export interface TUserData {
   email: string;
   name: string;
-  _id: string;
+  id: string;
 }
 
 export interface TAuthState {
@@ -19,7 +19,7 @@ export const initialState: TAuthState = {
   userData: {
     email: "",
     name: "",
-    _id: "",
+    id: "",
   },
   isAuthenticated: false,
   accessToken: "",

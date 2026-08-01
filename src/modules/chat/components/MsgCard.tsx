@@ -6,7 +6,7 @@ const MsgCard = ({ chat }: { chat: TChatMessage }) => {
   return (
     <div
       className={`${
-        chat.receiver === userData?._id ? "sender-msg-card" : "me-msg-card"
+        chat.receiver === userData?.id ? "sender-msg-card" : "me-msg-card"
       }`}
     >
       <p>{chat.message}</p>

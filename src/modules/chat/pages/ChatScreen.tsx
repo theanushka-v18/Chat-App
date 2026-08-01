@@ -16,10 +16,10 @@ const ChatScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (userData?._id) {
-      socket.emit("join", userData._id); // ✅ user joins their room
+    if (userData?.id) {
+      socket.emit("join", userData.id); // ✅ user joins their room
     }
-  }, [userData?._id]);
+  }, [userData?.id]);
 
   return (
     <div className="chat-screen-container">

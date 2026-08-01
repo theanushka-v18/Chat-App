@@ -41,8 +41,8 @@ const InputSection = ({
           if (!isTyping) {
             setIsTyping(true);
             socket.emit("typing", {
-              senderId: userData?._id,
-              receiverId: selectedUser?._id,
+              senderId: userData?.id,
+              receiverId: selectedUser?.id,
             });
           }
 
@@ -51,8 +51,8 @@ const InputSection = ({
           typingTimeout = setTimeout(() => {
             setIsTyping(false);
             socket.emit("stop_typing", {
-              senderId: userData?._id,
-              receiverId: selectedUser?._id,
+              senderId: userData?.id,
+              receiverId: selectedUser?.id,
             });
           }, 1000);
         }}

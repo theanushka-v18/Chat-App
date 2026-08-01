@@ -83,7 +83,7 @@ const chatSlice = createSlice({
       state.selectedUser = action.payload;
       // clear unread when switching to this chat
       if (action.payload) {
-        state.unreadCounts[action.payload._id] = 0;
+        state.unreadCounts[action.payload.id] = 0;
       }
     },
   },

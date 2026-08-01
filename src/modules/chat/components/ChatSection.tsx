@@ -35,11 +35,11 @@ const ChatSection = () => {
   };
 
   useEffect(() => {
-    if (selectedUser && userData?._id) {
+    if (selectedUser && userData?.id) {
       dispatch(
         getChatHistory({
-          fromUserId: userData._id,
-          toUserId: selectedUser._id,
+          fromUserId: userData.id,
+          toUserId: selectedUser.id,
         }),
       )
         .unwrap()
@@ -54,9 +54,8 @@ const ChatSection = () => {
   useEffect(() => {
     socket.on("receive_message", (data) => {
       const isCurrentChat =
-        (data.sender === selectedUser?._id &&
-          data.receiver === userData?._id) ||
-        (data.receiver === selectedUser?._id && data.sender === userData?._id);
+        (data.sender === selectedUser?.id && data.receiver === userData?.id) ||
+        (data.receiver === selectedUser?.id && data.sender === userData?.id);
 
       if (isCurrentChat) {
         setChats((prev) => [...prev, data]);
@@ -74,7 +73,7 @@ const ChatSection = () => {
 
           notification.onclick = () => {
             window.focus();
-            const senderUser = allUsers.find((u) => u._id === data.sender);
+            const senderUser = allUsers.find((u) => u.id === data.sender);
             if (senderUser) {
               dispatch(setSelectedUser(senderUser));
             }
@@ -86,7 +85,7 @@ const ChatSection = () => {
     return () => {
       socket.off("receive_message");
     };
-  }, [selectedUser, userData?._id, dispatch, allUsers]);
+  }, [selectedUser, userData?.id, dispatch, allUsers]);
 
   useEffect(() => {
     socket.on("typing", ({ senderId }) => {
@@ -110,8 +109,8 @@ const ChatSection = () => {
     if (!message.trim() || !selectedUser) return;
 
     const payload = {
-      fromUserId: userData?._id,
-      toUserId: selectedUser?._id,
+      fromUserId: userData?.id,
+      toUserId: selectedUser?.id,
       message,
       timestamp: new Date().toISOString(),
       senderName: userData?.name,
@@ -129,8 +128,8 @@ const ChatSection = () => {
       <div className="message-area">
         {chats?.length > 0 ? (
           <>
-            {chats?.map((chat) => {
-              return <MsgCard chat={chat} />;
+            {chats?.map((chat, idx) => {
+              return <MsgCard key={chat.timestamp} chat={chat} />;
             })}
 
             <AnimatePresence>
@@ -143,7 +142,7 @@ const ChatSection = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <span className="typing-text">
-                    {allUsers.find((u) => u._id === typingUser)?.name ||
+                    {allUsers.find((u) => u.id === typingUser)?.name ||
                       "Someone"}{" "}
                     is typing
                   </span>
@@ -180,6 +179,7 @@ const ChatSection = () => {
                 {[1, 2, 3, 4].map((n) => {
                   return (
                     <div
+                      key={n}
                       style={{
                         alignSelf: n % 2 === 0 ? "flex-start" : "flex-end",
                         display: "flex",
