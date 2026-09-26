@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import InputSection from "./InputSection";
 import MsgCard from "./MsgCard";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getChatHistory,
   incrementUnread,
@@ -21,6 +21,15 @@ const ChatSection = () => {
 
   const [chats, setChats] = useState<TChatMessage[]>([]);
   const [typingUser, setTypingUser] = useState(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
+
+  useEffect(() => {
+    scrollToBottom("smooth");
+  }, [chats, typingUser]);
 
   const dotVariants: Variants = {
     animate: {
@@ -164,6 +173,7 @@ const ChatSection = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+            <div ref={messagesEndRef} />
           </>
         ) : (
           <>
