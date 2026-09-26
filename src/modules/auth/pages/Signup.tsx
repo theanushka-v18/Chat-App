@@ -18,7 +18,14 @@ const Signup = () => {
 
   const { isLoading } = useAppSelector((state) => state.auth);
 
+  const isButtonDisabled = !userDetails.fullName || !userDetails.email || !userDetails.password;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if(e.target.name === 'email') {
+      if(e.target.value.length > 255) {
+        return; // Prevent further input if the email exceeds 255 characters
+      }
+    };
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
   };
 
@@ -56,7 +63,7 @@ const Signup = () => {
           <input
             type="email"
             placeholder="Enter your email"
-            value={userDetails.email}
+            value={userDetails.email.toLowerCase()}
             onChange={handleChange}
             id="email"
             required
@@ -77,7 +84,7 @@ const Signup = () => {
 
           <div className="auth-btn-links">
             <Link to={RoutePaths.LOGIN}>Already a user? Sign in here</Link>
-            <button type="submit" className="primary-button">
+            <button disabled={isButtonDisabled || isLoading} type="submit" className="primary-button">
               {isLoading ? (
                 <TbLoader size={30} className="loader" />
               ) : (

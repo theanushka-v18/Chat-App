@@ -36,6 +36,12 @@ const InputSection = ({
         type="text"
         placeholder="Type your message here..."
         value={message}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
         onChange={(e) => {
           setMessage(e.target.value);
           if (!isTyping) {
