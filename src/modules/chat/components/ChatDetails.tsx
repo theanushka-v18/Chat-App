@@ -102,7 +102,11 @@ const ChatDetails = ({
       <ScrollArea style={{ flex: 1, minHeight: 0 }} type="hover">
         <Stack gap="lg" px="md" pb="lg">
           <Stack gap="xs" align="center" ta="center">
-            <UserAvatar name={selectedUser?.name ?? "User"} size={84} />
+            <UserAvatar
+              name={selectedUser?.name ?? "User"}
+              src={selectedUser?.profileImage?.url ?? null}
+              size={84}
+            />
             <Text fw={700} fz="lg" lineClamp={1} w="100%">
               {selectedUser?.name ?? "No conversation"}
             </Text>

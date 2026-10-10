@@ -243,7 +243,11 @@ const ChatSection = ({
           </Box>
 
           {selectedUser ? (
-            <UserAvatar name={selectedUser.name} size={38} />
+            <UserAvatar
+              name={selectedUser.name}
+              src={selectedUser.profileImage?.url ?? null}
+              size={38}
+            />
           ) : (
             <ThemeIcon size={38} radius="xl" variant="light">
               <LuMessageCircle size={20} />

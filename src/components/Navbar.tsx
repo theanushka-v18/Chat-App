@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import chatAppLogo from "@assets/chat-app-logo.png";
 import userLogo from "@assets/user-logo.png";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { LuLogOut } from "react-icons/lu";
+import { LuCamera } from "react-icons/lu";
 import {
   changePassword,
   logout,
   logoutReducer,
+  uploadProfileImage,
 } from "@modules/auth/redux/authSlice";
 import { useNavigate } from "react-router-dom";
 import { RiLockPasswordFill } from "react-icons/ri";
@@ -76,8 +78,9 @@ const ColorSchemeToggle = () => {
 
 const Navbar = () => {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [changePasswordDetails, setChangePasswordDetails] =
-    useState(emptyPasswordDetails);
+  const [changePasswordDetails, setChangePasswordDetails] = useState(emptyPasswordDetails);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isMobile = useMediaQuery("(max-width: 47.99em)", undefined, {
     getInitialValueInEffect: false,
@@ -142,6 +145,44 @@ const Navbar = () => {
     }
   };
 
+  const handleProfileImageClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    fileInputRef.current?.click();
+  };
+
+  const handleProfileImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      notify.warning("Image size should be less than 5MB", { autoClose: 2000 });
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      notify.warning("Please select a JPG, PNG or WEBP image", {
+        autoClose: 2000,
+      });
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    try {
+      await dispatch(uploadProfileImage(file)).unwrap();
+      notify.success("Profile photo updated", { autoClose: 2000 });
+    } catch (error: any) {
+      notify.warning(error?.message || "Failed to update profile photo", {
+        autoClose: 3000,
+      });
+    } finally {
+      setPreviewUrl(null);
+      URL.revokeObjectURL(url);
+    }
+  };
+
   return (
     <>
       <Flex
@@ -194,6 +235,7 @@ const Navbar = () => {
                   px={4}
                   py={4}
                   style={{ borderRadius: "0.75rem", flexShrink: 0 }}
+                  onMouseDown={(e) => e.stopPropagation()}
                 >
                   <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
                     <Box visibleFrom="sm" maw={160} style={{ minWidth: 0 }}>
@@ -206,24 +248,77 @@ const Navbar = () => {
                         {displayName}
                       </Text>
                     </Box>
-                    <UserAvatar
-                      name={userData?.name || "User"}
-                      src={userLogo}
-                      size={36}
-                      online
-                    />
+                    <Group gap={6} wrap="nowrap" align="center">
+                      <Box style={{ position: "relative" }}>
+                        <UserAvatar
+                          name={userData?.name || "User"}
+                          src={previewUrl || userData?.profileImage?.url || userLogo}
+                          size={36}
+                          online
+                        />
+                        <Tooltip label="Change profile photo">
+                          <ActionIcon
+                            size="xs"
+                            radius="xl"
+                            variant="filled"
+                            color="blue"
+                            style={{
+                              position: "absolute",
+                              bottom: -2,
+                              right: -2,
+                              boxShadow: "var(--mantine-shadow-sm)",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleProfileImageClick(e);
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            aria-label="Change profile photo"
+                          >
+                            <LuCamera size={10} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </Box>
+                    </Group>
                   </Group>
                 </UnstyledButton>
               </Menu.Target>
 
               <Menu.Dropdown>
-                <Menu.Label>
+                <Menu.Label
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
                   <Group gap="xs" wrap="nowrap">
-                    <UserAvatar
-                      name={userData?.name || "User"}
-                      src={userLogo}
-                      size={38}
-                    />
+                    <Box style={{ position: "relative" }}>
+                      <UserAvatar
+                        name={userData?.name || "User"}
+                        src={previewUrl || userData?.profileImage?.url || userLogo}
+                        size={38}
+                      />
+                      <Tooltip label="Change profile photo">
+                        <ActionIcon
+                          size="xs"
+                          radius="xl"
+                          variant="filled"
+                          color="blue"
+                          style={{
+                            position: "absolute",
+                            bottom: -2,
+                            right: -2,
+                            boxShadow: "var(--mantine-shadow-sm)",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProfileImageClick(e);
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          aria-label="Change profile photo"
+                        >
+                          <LuCamera size={10} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Box>
                     <Box style={{ minWidth: 0 }}>
                       <Text fw={600} fz="sm" lineClamp={1}>
                         {displayName}
@@ -235,6 +330,12 @@ const Navbar = () => {
                   </Group>
                 </Menu.Label>
                 <Menu.Divider />
+                <Menu.Item
+                  onClick={handleProfileImageClick}
+                  leftSection={<LuCamera size={18} />}
+                >
+                  Change Profile Photo
+                </Menu.Item>
                 <Menu.Item
                   leftSection={<RiLockPasswordFill size={18} />}
                   onClick={() => setIsChangePasswordOpen(true)}
@@ -325,6 +426,14 @@ const Navbar = () => {
           </Stack>
         </form>
       </Modal>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        hidden
+        onChange={handleProfileImageChange}
+      />
     </>
   );
 };

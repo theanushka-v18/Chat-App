@@ -2,10 +2,16 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { apiClient } from "@services/apiService";
 import { authEndpoints } from "@modules/auth/api/authEndpoints";
 
+export interface TProfileImage {
+  url?: string;
+  publicId?: string;
+}
+
 export interface TUserData {
   email: string;
   name: string;
   id: string;
+  profileImage?: TProfileImage;
 }
 
 export interface TAuthState {
@@ -138,6 +144,26 @@ export const resetPassword = createAsyncThunk(
   },
 );
 
+export const uploadProfileImage = createAsyncThunk(
+  "uploadProfileImage",
+  async (file: File) => {
+    const formData = new FormData();
+    formData.append("profileImage", file);
+
+    try {
+      const response = await apiClient.post(
+        authEndpoints.UPLOAD_PROFILE_IMAGE,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } },
+      );
+      const { user, message } = response.data;
+      return { user, message };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "Upload failed");
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -210,6 +236,20 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(resetPassword.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(uploadProfileImage.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(uploadProfileImage.fulfilled, (state, action) => {
+        state.userData = {
+          ...state.userData,
+          ...action.payload.user,
+          id: action.payload.user.id,
+        } as TUserData;
+        state.isLoading = false;
+      })
+      .addCase(uploadProfileImage.rejected, (state) => {
         state.isLoading = false;
       });
   },

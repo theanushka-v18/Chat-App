@@ -5,4 +5,5 @@ export const authEndpoints = {
   CHANGE_PASSWORD: "/change-password",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
+  UPLOAD_PROFILE_IMAGE: "/profile-image",
 };
