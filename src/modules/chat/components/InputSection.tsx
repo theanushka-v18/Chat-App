@@ -1,73 +1,122 @@
-import { useEffect, useState } from "react";
-import { IoSend } from "react-icons/io5";
+import { useEffect, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { LuSend } from "react-icons/lu";
 import { useSelector } from "react-redux";
 import socket from "@services/socket";
 import type { RootState } from "@redux/store";
-import type { TChatMessage } from "@modules/chat/redux/chatSlice";
+import { ActionIcon, Group, Textarea, Tooltip } from "@mantine/core";
 
-const InputSection = ({
-  onSendMessage,
-  setChats,
-}: {
+interface IInputSectionProps {
   onSendMessage: (message: string) => void;
-  setChats: React.Dispatch<React.SetStateAction<TChatMessage[]>>;
-}) => {
+  /** Active conversation id, used for the typing socket events */
+  recipientId?: string;
+}
+
+const InputSection = ({ onSendMessage, recipientId }: IInputSectionProps) => {
   const [message, setMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  let typingTimeout: number | undefined;
+  const isTypingRef = useRef(false);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { selectedUser } = useSelector((state: RootState) => state.chat);
   const { userData } = useSelector((state: RootState) => state.auth);
 
+  const activeId = recipientId ?? selectedUser?.id;
+
+  // Reset the draft (and typing signal) when the conversation changes.
   useEffect(() => {
     setMessage("");
-    setChats([]);
-  }, [selectedUser]);
+    isTypingRef.current = false;
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    socket.emit("stop_typing", {
+      senderId: userData?.id,
+      receiverId: activeId,
+    });
+  }, [activeId, userData?.id]);
+
+  useEffect(
+    () => () => {
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    },
+    [],
+  );
+
+  const stopTyping = () => {
+    isTypingRef.current = false;
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    socket.emit("stop_typing", {
+      senderId: userData?.id,
+      receiverId: activeId,
+    });
+  };
 
   const handleSend = () => {
     if (message.trim() === "") return;
-
     onSendMessage(message);
-    setMessage(""); // clear input
+    setMessage("");
+    stopTyping();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleTyping = (value: string) => {
+    setMessage(value);
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      socket.emit("typing", {
+        senderId: userData?.id,
+        receiverId: activeId,
+      });
+    }
+
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(stopTyping, 1200);
   };
 
   return (
-    <div className="input-section">
-      <input
-        type="text"
-        placeholder="Type your message here..."
+    <Group gap="xs" align="flex-end" wrap="nowrap" w="100%">
+      <Textarea
+        style={{ flex: 1, minWidth: 0 }}
+        autosize
+        minRows={1}
+        maxRows={5}
+        aria-label="Message"
+        placeholder="Type a message…"
         value={message}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            handleSend();
-          }
+        onChange={(event) => handleTyping(event.currentTarget.value)}
+        onKeyDown={handleKeyDown}
+        disabled={!activeId}
+        radius="xl"
+        px="md"
+        styles={{
+          input: {
+            backgroundColor: "var(--app-surface)",
+            border: "1px solid var(--app-border)",
+            paddingTop: 10,
+            paddingBottom: 10,
+            fontSize: "0.95rem",
+          },
         }}
-        onChange={(e) => {
-          setMessage(e.target.value);
-          if (!isTyping) {
-            setIsTyping(true);
-            socket.emit("typing", {
-              senderId: userData?.id,
-              receiverId: selectedUser?.id,
-            });
-          }
-
-          clearTimeout(typingTimeout);
-
-          typingTimeout = setTimeout(() => {
-            setIsTyping(false);
-            socket.emit("stop_typing", {
-              senderId: userData?.id,
-              receiverId: selectedUser?.id,
-            });
-          }, 1000);
-        }}
-        disabled={!selectedUser}
       />
-      <button className="primary-button" onClick={handleSend}>
-        <IoSend />
-      </button>
-    </div>
+      <Tooltip label="Send (Enter)">
+        <ActionIcon
+          size={44}
+          radius="xl"
+          variant="gradient"
+          gradient={{ from: "brand.5", to: "violet.5", deg: 135 }}
+          aria-label="Send message"
+          onClick={handleSend}
+          disabled={!activeId || message.trim() === ""}
+          style={{ flexShrink: 0, boxShadow: "var(--app-shadow-brand)" }}
+        >
+          <LuSend size={18} />
+        </ActionIcon>
+      </Tooltip>
+    </Group>
   );
 };
 

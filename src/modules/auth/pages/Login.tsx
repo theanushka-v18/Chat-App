@@ -1,11 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import homePage from "@assets/home-page.png";
-import { motion } from "motion/react";
-import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import React, { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { login } from "@modules/auth/redux/authSlice";
-import { TbLoader } from "react-icons/tb";
 import { RoutePaths } from "@/api/RoutePaths";
+import AuthField from "@modules/auth/components/AuthField";
+import AuthShell, { AuthHeading } from "@modules/auth/components/AuthShell";
+import { Anchor, Button, Group, Stack, Text } from "@mantine/core";
+import { brandGradient } from "@/theme";
 
 const Login = () => {
   const [userDetails, setUserDetails] = useState({
@@ -35,62 +36,75 @@ const Login = () => {
       navigate(RoutePaths.CHAT);
     }
   };
+
   return (
-    <div className="auth-container">
-      <motion.img
-        initial={{ x: 150 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 1 }}
-        src={homePage}
-        alt="Home Page"
+    <AuthShell>
+      <AuthHeading
+        title="Welcome back"
+        description="Sign in to pick up your conversations where you left off."
       />
-      <motion.div
-        initial={{ x: -150 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 1 }}
-        className="form-container"
-      >
-        <h1 className="form-title">Sign In</h1>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="email">EMAIL</label>
-          <input
+
+      <form onSubmit={handleSubmit} noValidate>
+        <Stack gap="md">
+          <AuthField
+            id="email"
+            name="email"
             type="email"
-            placeholder="Enter your email"
+            label="Email"
+            placeholder="you@example.com"
             value={userDetails.email.toLowerCase()}
             onChange={handleChange}
-            id="email"
-            required
-            className="input"
-            name="email"
+            autoComplete="email"
+            icon="mail"
           />
 
-          <label htmlFor="passworwd">PASSWORD</label>
-          <input
-            type="password"
+          <AuthField
+            id="password"
+            name="password"
+            label="Password"
             placeholder="Enter your password"
             value={userDetails.password}
             onChange={handleChange}
-            required
-            className="input"
-            name="password"
+            isPassword
+            autoComplete="current-password"
+            icon="lock"
           />
 
-          <div className="forgot-password-text">
-            <Link to={RoutePaths.FORGOT_PASSWORD}>Forgot password?</Link>
-          </div>
-          <div className="auth-btn-links">
-            <Link to={RoutePaths.SIGNUP}>New user? Sign up here</Link>
-            <button disabled={isButtonDisabled || isLoading} type="submit" className="primary-button">
-              {isLoading ? (
-                <TbLoader size={30} className="loader" />
-              ) : (
-                "Sign In"
-              )}
-            </button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
+          <Group justify="flex-end" mt={-6}>
+            <Anchor
+              component={Link}
+              to={RoutePaths.FORGOT_PASSWORD}
+              fz="sm"
+              fw={500}
+            >
+              Forgot password?
+            </Anchor>
+          </Group>
+
+          <Button
+            type="submit"
+            size="md"
+            fullWidth
+            disabled={isButtonDisabled}
+            loading={isLoading}
+            variant="gradient"
+            gradient={brandGradient}
+            style={{ boxShadow: "var(--app-shadow-brand)" }}
+          >
+            Sign in
+          </Button>
+
+          <Group justify="center" gap={6}>
+            <Text fz="sm" c="dimmed">
+              New here?
+            </Text>
+            <Anchor component={Link} to={RoutePaths.SIGNUP} fz="sm" fw={600}>
+              Create an account
+            </Anchor>
+          </Group>
+        </Stack>
+      </form>
+    </AuthShell>
   );
 };
 

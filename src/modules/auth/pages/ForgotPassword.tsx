@@ -1,10 +1,13 @@
-import { motion } from "motion/react";
 import React, { useState } from "react";
-import { TbLoader } from "react-icons/tb";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { useNavigate } from "react-router-dom";
 import { forgotPassword } from "@modules/auth/redux/authSlice";
 import { RoutePaths } from "@/api/RoutePaths";
+import AuthField from "@modules/auth/components/AuthField";
+import AuthShell, { AuthHeading } from "@modules/auth/components/AuthShell";
+import { Alert, Button, Group, Stack, Text } from "@mantine/core";
+import { LuCircleCheck, LuMail } from "react-icons/lu";
+import { brandGradient } from "@/theme";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -23,51 +26,66 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="auth-container">
-      <motion.div
-        initial={{ x: -150 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 1 }}
-        className="form-container"
-      >
-        <h1 className="form-title">Forgot password</h1>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="email">EMAIL</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            id="email"
-            required
-            className="input"
-            name="email"
-          />
-          <div className="auth-btn-links">
-            {isEmailSent ? (
-              "Reset link has been sent to your email"
-            ) : (
-              <button type="submit" className="primary-button">
-                {isLoading ? (
-                  <TbLoader size={30} className="loader" />
-                ) : (
-                  "Send reset link"
-                )}
-              </button>
-            )}
-            {!isEmailSent && (
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => navigate(RoutePaths.LOGIN)}
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-        </form>
-      </motion.div>
-    </div>
+    <AuthShell>
+      <AuthHeading
+        title="Reset your password"
+        description="Enter the email linked to your account and we will send you a reset link."
+      />
+
+      <form onSubmit={handleSubmit} noValidate>
+        <Stack gap="md">
+          {isEmailSent ? (
+            <Alert
+              variant="light"
+              color="green"
+              radius="md"
+              icon={<LuCircleCheck size={20} />}
+              title="Check your inbox"
+            >
+              A password reset link was sent to <Text span fw={600}>{email}</Text>.
+              Open it on this device to choose a new password.
+            </Alert>
+          ) : (
+            <AuthField
+              id="email"
+              name="email"
+              type="email"
+              label="Email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              icon="mail"
+            />
+          )}
+
+          <Button
+            type="submit"
+            size="md"
+            fullWidth
+            loading={isLoading && !isEmailSent}
+            variant="gradient"
+            gradient={brandGradient}
+            style={{ boxShadow: "var(--app-shadow-brand)" }}
+            leftSection={isEmailSent ? <LuMail size={18} /> : undefined}
+          >
+            {isEmailSent ? "Resend link" : "Send reset link"}
+          </Button>
+
+          <Group justify="center" gap={6}>
+            <Button
+              type="button"
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => navigate(RoutePaths.LOGIN)}
+            >
+              Back to sign in
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </AuthShell>
   );
 };
 

@@ -1,21 +1,14 @@
-import { motion } from "framer-motion";
+import { Group, Skeleton, Stack } from "@mantine/core";
 
-export default function UserShimmerBox({ width = "200px", height = "20px" }) {
-  return (
-    <div
-      style={{ position: "relative", overflow: "hidden", borderRadius: "8px", marginBottom: '20px' }}
-    >
-      <motion.div
-        style={{
-          background:
-            "linear-gradient(90deg, #757fb2 25%, #a6aed2 50%, #757fb2 75%)",
-          height,
-          width,
-          backgroundSize: "200% 100%",
-        }}
-        animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      />
-    </div>
-  );
-}
+/** Loading placeholder for one row of the conversations list. */
+const UserShimmerBox = () => (
+  <Group gap="sm" wrap="nowrap" align="center">
+    <Skeleton height={42} width={42} radius="xl" />
+    <Stack gap={6} style={{ flex: 1, minWidth: 0 }}>
+      <Skeleton height={11} width="55%" radius="xl" />
+      <Skeleton height={9} width="80%" radius="xl" />
+    </Stack>
+  </Group>
+);
+
+export default UserShimmerBox;

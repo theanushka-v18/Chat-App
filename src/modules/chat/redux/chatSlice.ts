@@ -30,15 +30,15 @@ const initialState: TChatState = {
 };
 
 export const getAllUsers = createAsyncThunk<
-  { message: string; users: TUserData[] },
+  { users: TUserData[] },
   { name: string | undefined }
 >(
   "getAllUsers",
   async ({ name }) => {
     try {
       const response = await apiClient.post(chatEndpoints.ALL_USERS, { name });
-      const { message, users } = response.data;
-      return { message, users };
+      const { users } = response.data;
+      return { users };
     } catch (error: any) {
       throw new Error(error.response.data.message);
     }
@@ -46,7 +46,7 @@ export const getAllUsers = createAsyncThunk<
 );
 
 export const getChatHistory = createAsyncThunk<
-  { chats: TChatMessage[]; message: string },
+  { chats: TChatMessage[] },
   { fromUserId: string; toUserId: string }
 >(
   "getChatHistory",
@@ -59,8 +59,8 @@ export const getChatHistory = createAsyncThunk<
         fromUserId,
         toUserId,
       });
-      const { chats, message } = response.data;
-      return { chats, message };
+      const { chats } = response.data;
+      return { chats };
     } catch (error: any) {
       throw new Error(error.response.data.message);
     }

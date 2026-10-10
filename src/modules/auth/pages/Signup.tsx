@@ -1,11 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import homePage from "@assets/home-page.png";
-import { motion } from "motion/react";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { signup } from "@modules/auth/redux/authSlice";
-import { TbLoader } from "react-icons/tb";
 import { RoutePaths } from "@/api/RoutePaths";
+import AuthField from "@modules/auth/components/AuthField";
+import AuthShell, { AuthHeading } from "@modules/auth/components/AuthShell";
+import { Anchor, Button, Group, Stack } from "@mantine/core";
+import { brandGradient } from "@/theme";
 
 const Signup = () => {
   const [userDetails, setUserDetails] = useState({
@@ -18,14 +19,15 @@ const Signup = () => {
 
   const { isLoading } = useAppSelector((state) => state.auth);
 
-  const isButtonDisabled = !userDetails.fullName || !userDetails.email || !userDetails.password;
+  const isButtonDisabled =
+    !userDetails.fullName || !userDetails.email || !userDetails.password;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.name === 'email') {
-      if(e.target.value.length > 255) {
+    if (e.target.name === "email") {
+      if (e.target.value.length > 255) {
         return; // Prevent further input if the email exceeds 255 characters
       }
-    };
+    }
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
   };
 
@@ -38,70 +40,70 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-container">
-      <motion.div
-        initial={{ x: -150 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 1 }}
-        className="form-container"
-      >
-        <h1 className="form-title">Sign Up</h1>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="fullName">Full Name</label>
-          <input
-            type="text"
-            placeholder="Enter your full name"
+    <AuthShell>
+      <AuthHeading
+        title="Create your account"
+        description="A few seconds and you can start chatting in real time."
+      />
+
+      <form onSubmit={handleSubmit} noValidate>
+        <Stack gap="md">
+          <AuthField
+            id="fullName"
+            name="fullName"
+            label="Full name"
+            placeholder="Ada Lovelace"
             value={userDetails.fullName}
             onChange={handleChange}
-            id="fullName"
-            required
-            className="input"
-            name="fullName"
+            autoComplete="name"
+            icon="user"
           />
 
-          <label htmlFor="email">EMAIL</label>
-          <input
+          <AuthField
+            id="email"
+            name="email"
             type="email"
-            placeholder="Enter your email"
+            label="Email"
+            placeholder="you@example.com"
             value={userDetails.email.toLowerCase()}
             onChange={handleChange}
-            id="email"
-            required
-            className="input"
-            name="email"
+            autoComplete="email"
+            icon="mail"
           />
 
-          <label htmlFor="passworwd">PASSWORD</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
+          <AuthField
+            id="password"
+            name="password"
+            label="Password"
+            placeholder="Choose a strong password"
             value={userDetails.password}
             onChange={handleChange}
-            required
-            className="input"
-            name="password"
+            isPassword
+            autoComplete="new-password"
+            icon="lock"
           />
 
-          <div className="auth-btn-links">
-            <Link to={RoutePaths.LOGIN}>Already a user? Sign in here</Link>
-            <button disabled={isButtonDisabled || isLoading} type="submit" className="primary-button">
-              {isLoading ? (
-                <TbLoader size={30} className="loader" />
-              ) : (
-                "Sign Up"
-              )}
-            </button>
-          </div>
-        </form>
-      </motion.div>
-      <motion.img
-        initial={{ x: 150 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 1 }}
-        src={homePage}
-        alt="Home Page"
-      />
-    </div>
+          <Button
+            type="submit"
+            size="md"
+            fullWidth
+            disabled={isButtonDisabled}
+            loading={isLoading}
+            variant="gradient"
+            gradient={brandGradient}
+            style={{ boxShadow: "var(--app-shadow-brand)" }}
+          >
+            Create account
+          </Button>
+
+          <Group justify="center" gap={6}>
+            <Anchor component={Link} to={RoutePaths.LOGIN} fz="sm" fw={500}>
+              Already have an account? Sign in
+            </Anchor>
+          </Group>
+        </Stack>
+      </form>
+    </AuthShell>
   );
 };
 

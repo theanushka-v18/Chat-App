@@ -1,11 +1,13 @@
-import { motion } from "motion/react";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { resetPassword } from "@modules/auth/redux/authSlice";
-import { TbLoader } from "react-icons/tb";
-import { toast } from "react-toastify";
+import { notify } from "@services/notify";
 import { RoutePaths } from "@/api/RoutePaths";
+import AuthField from "@modules/auth/components/AuthField";
+import AuthShell, { AuthHeading } from "@modules/auth/components/AuthShell";
+import { Button, Group, Stack } from "@mantine/core";
+import { brandGradient } from "@/theme";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -16,6 +18,9 @@ const ResetPassword = () => {
     confirmNewPassword: "",
   });
   const { isLoading } = useAppSelector((state) => state.auth);
+
+  const isFormIncomplete =
+    !resetPasswordDetails.newPassword || !resetPasswordDetails.confirmNewPassword;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setResetPasswordDetails({
@@ -30,8 +35,8 @@ const ResetPassword = () => {
       resetPasswordDetails.newPassword !==
       resetPasswordDetails.confirmNewPassword
     ) {
-      toast.warning("Confirm password should be same as new password", {
-        autoClose: 1000,
+      notify.warning("Confirm password should be same as new password", {
+        autoClose: 2000,
       });
       return;
     }
@@ -45,57 +50,65 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="auth-container">
-      <motion.div
-        initial={{ x: -150 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 1 }}
-        className="form-container"
-      >
-        <h1 className="form-title">Reset password</h1>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="newPassword">NEW PASSWORD</label>
-          <input
-            type="password"
-            placeholder="Enter new password"
+    <AuthShell>
+      <AuthHeading
+        title="Choose a new password"
+        description="Pick something you have not used before, then confirm it below."
+      />
+
+      <form onSubmit={handleSubmit} noValidate>
+        <Stack gap="md">
+          <AuthField
+            id="newPassword"
+            name="newPassword"
+            label="New password"
+            placeholder="At least 8 characters"
             value={resetPasswordDetails.newPassword}
             onChange={handleChange}
-            id="newPassword"
-            required
-            className="input"
-            name="newPassword"
+            isPassword
+            autoComplete="new-password"
+            icon="lock"
           />
 
-          <label htmlFor="confirmNewPassword">CONFIRM NEW PASSWORD</label>
-          <input
-            type="password"
-            placeholder="Confirm new password"
+          <AuthField
+            id="confirmNewPassword"
+            name="confirmNewPassword"
+            label="Confirm new password"
+            placeholder="Re-enter new password"
             value={resetPasswordDetails.confirmNewPassword}
             onChange={handleChange}
-            id="confirmNewPassword"
-            required
-            className="input"
-            name="confirmNewPassword"
+            isPassword
+            autoComplete="new-password"
+            icon="lock"
           />
-          <div className="auth-btn-links">
-            <button type="submit" className="primary-button">
-              {isLoading ? (
-                <TbLoader size={30} className="loader" />
-              ) : (
-                "Reset Password"
-              )}
-            </button>
-            <button
+
+          <Button
+            type="submit"
+            size="md"
+            fullWidth
+            disabled={isFormIncomplete}
+            loading={isLoading}
+            variant="gradient"
+            gradient={brandGradient}
+            style={{ boxShadow: "var(--app-shadow-brand)" }}
+          >
+            Reset password
+          </Button>
+
+          <Group justify="center" gap={6}>
+            <Button
               type="button"
-              className="secondary-button"
+              variant="subtle"
+              color="gray"
+              size="sm"
               onClick={() => navigate(RoutePaths.LOGIN)}
             >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
+              Back to sign in
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </AuthShell>
   );
 };
 

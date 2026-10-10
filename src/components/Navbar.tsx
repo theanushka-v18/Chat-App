@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import chatAppLogo from "@assets/chat-app-logo.png";
 import userLogo from "@assets/user-logo.png";
-import { AnimatePresence, motion } from "motion/react";
 import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import { LuLogOut } from "react-icons/lu";
 import {
@@ -11,41 +11,107 @@ import {
 } from "@modules/auth/redux/authSlice";
 import { useNavigate } from "react-router-dom";
 import { RiLockPasswordFill } from "react-icons/ri";
-import { toast } from "react-toastify";
-import { TbLoader } from "react-icons/tb";
+import { notify } from "@services/notify";
 import { RoutePaths } from "@/api/RoutePaths";
+import AuthField from "@modules/auth/components/AuthField";
+import UserAvatar from "@components/UserAvatar";
+import { useMediaQuery } from "@mantine/hooks";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Group,
+  Image,
+  Menu,
+  Modal,
+  Stack,
+  Text,
+  ThemeIcon,
+  Tooltip,
+  UnstyledButton,
+  useComputedColorScheme,
+  useMantineColorScheme,
+} from "@mantine/core";
+import { LuMoon, LuSun } from "react-icons/lu";
+import type { RootState } from "@/redux/store";
+
+const emptyPasswordDetails = {
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
+
+const toDisplayName = (name?: string) =>
+  (name ?? "")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+const ColorSchemeToggle = () => {
+  const { setColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme("light");
+  const nextScheme = computedColorScheme === "dark" ? "light" : "dark";
+
+  return (
+    <Tooltip label={`Switch to ${nextScheme} mode`}>
+      <ActionIcon
+        variant="subtle"
+        color="gray"
+        size="lg"
+        aria-label={`Switch to ${nextScheme} mode`}
+        onClick={() => setColorScheme(nextScheme)}
+      >
+        {computedColorScheme === "dark" ? (
+          <LuSun size={20} />
+        ) : (
+          <LuMoon size={20} />
+        )}
+      </ActionIcon>
+    </Tooltip>
+  );
+};
 
 const Navbar = () => {
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [changePasswordModal, setChangePasswordModal] = useState(false);
-  const [changePasswordDetails, setChangePasswordDetails] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [changePasswordDetails, setChangePasswordDetails] =
+    useState(emptyPasswordDetails);
+
+  const isMobile = useMediaQuery("(max-width: 47.99em)", undefined, {
+    getInitialValueInEffect: false,
   });
 
   const { userData, isAuthenticated, isLoading } = useAppSelector(
-    (state) => state.auth,
+    (state: RootState) => state.auth,
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const displayName = toDisplayName(userData?.name) || "Account";
+
+  const closeChangePassword = () => {
+    setIsChangePasswordOpen(false);
+    setChangePasswordDetails(emptyPasswordDetails);
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setChangePasswordDetails({
       ...changePasswordDetails,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (
       changePasswordDetails.newPassword !==
       changePasswordDetails.confirmPassword
     ) {
-      toast.warning("Confirm password should be same as new password", {
-        autoClose: 1000,
+      notify.warning("Confirm password should be same as new password", {
+        autoClose: 2000,
       });
       return;
     }
@@ -60,198 +126,206 @@ const Navbar = () => {
         dispatch(logout());
         dispatch(logoutReducer());
         navigate(RoutePaths.LOGIN);
-        setChangePasswordModal(false);
-        setChangePasswordDetails({
-          oldPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
-        toast.success("Password changed successfully! Please login again", {
-          autoClose: 1000,
+        closeChangePassword();
+        notify.success("Password changed successfully! Please login again", {
+          autoClose: 2000,
         });
       });
   };
 
+  const handleLogout = async () => {
+    const result = await dispatch(logout());
+
+    if (logout.fulfilled.match(result)) {
+      navigate(RoutePaths.LOGIN);
+      dispatch(logoutReducer());
+    }
+  };
+
   return (
-    <div className="navbar-container">
-      <div className="left-container">
-        <img src={chatAppLogo} alt="Chat App Logo" />
-        <h2>Chat App</h2>
-      </div>
-
-      {isAuthenticated && (
-        <div className="right-container">
-          <div
-            style={{
-              display: "flex",
-              gap: "0.5rem",
-              alignItems: "center",
-              fontSize: "1.2rem",
-              color: "#fffcfb",
-              letterSpacing: "1px",
-            }}
+    <>
+      <Flex
+        component="header"
+        align="center"
+        justify="space-between"
+        gap="sm"
+        px={{ base: "sm", sm: "lg" }}
+        py={{ base: "xs", sm: "sm" }}
+        wrap="nowrap"
+        style={{
+          backgroundColor: "var(--app-surface-glass)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          borderBottom: "1px solid var(--app-border)",
+          paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+          position: "relative",
+          zIndex: 100,
+        }}
+      >
+        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+          <ThemeIcon
+            w={{ base: 34, sm: 40 }}
+            h={{ base: 34, sm: 40 }}
+            radius="md"
+            variant="gradient"
+            gradient={{ from: "brand.5", to: "violet.5", deg: 135 }}
+            style={{ flexShrink: 0, boxShadow: "var(--app-shadow-brand)" }}
           >
-            <p>
-              {userData?.name
-                .split(" ")
-                .map(
-                  (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
-                )
-                .join(" ")}
-            </p>
-            <motion.img
-              onClick={() => setIsUserModalOpen(!isUserModalOpen)}
-              src={userLogo}
-              alt="User Logo"
-            />
-          </div>
-          <AnimatePresence initial={false}>
-            {isUserModalOpen ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0 }}
-                className="user-details-modal"
-              >
-                <p className="user-data-text">{userData?.name}</p>
-                <p className="user-data-text">{userData?.email}</p>
-                <div className="user-data-btn-container">
-                  <button
-                    className="primary-button"
-                    onClick={() => {
-                      setIsUserModalOpen(false);
-                      setChangePasswordModal(true);
-                    }}
-                  >
-                    <RiLockPasswordFill
-                      color="whitesmoke"
-                      size={20}
-                      cursor={"pointer"}
-                    />
-                    Change Password
-                  </button>
-                  <button
-                    className="secondary-button"
-                    onClick={async () => {
-                      const result = await dispatch(logout());
-                      if (logout.fulfilled.match(result)) {
-                        navigate(RoutePaths.LOGIN);
-                        dispatch(logoutReducer());
-                        setIsUserModalOpen(false);
-                      }
-                    }}
-                  >
-                    {isLoading ? (
-                      <TbLoader size={20} className="loader" />
-                    ) : (
-                      <>
-                        <LuLogOut
-                          color="whitesmoke"
-                          size={20}
-                          cursor={"pointer"}
-                        />{" "}
-                        Sign out
-                      </>
-                    )}
-                  </button>
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+            <Image src={chatAppLogo} alt="" w={22} h={22} fit="contain" />
+          </ThemeIcon>
+          <Text
+            fw={700}
+            fz={{ base: "0.95rem", sm: "1.15rem" }}
+            lh={1.2}
+            style={{ whiteSpace: "nowrap", flexShrink: 0 }}
+          >
+            Orbither
+          </Text>
+        </Group>
 
-          <AnimatePresence initial={false}>
-            {changePasswordModal ? (
-              <>
-                <motion.div
-                  className="overlay"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => {
-                    setChangePasswordModal(false);
-                    setChangePasswordDetails({
-                      oldPassword: "",
-                      newPassword: "",
-                      confirmPassword: "",
-                    });
-                  }} // close on backdrop click
-                />
-                <motion.div
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  className="change-password-modal"
+        <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
+          <ColorSchemeToggle />
+
+          {isAuthenticated && (
+            <Menu width={280} position="bottom-end" withinPortal>
+              <Menu.Target>
+                <UnstyledButton
+                  aria-label="Account menu"
+                  px={4}
+                  py={4}
+                  style={{ borderRadius: "0.75rem", flexShrink: 0 }}
                 >
-                  <h1 className="form-title">Change Password</h1>
-                  <form onSubmit={handleSubmit}>
-                    <label htmlFor="oldPassword">OLD PASSWORD</label>
-                    <input
-                      type="password"
-                      placeholder="Enter old password"
-                      value={changePasswordDetails.oldPassword}
-                      onChange={handleChange}
-                      id="oldPassword"
-                      required
-                      className="input"
-                      name="oldPassword"
-                    />
-
-                    <label htmlFor="newPassword">NEW PASSWORD</label>
-                    <input
-                      type="password"
-                      placeholder="Enter new password"
-                      value={changePasswordDetails.newPassword}
-                      onChange={handleChange}
-                      required
-                      className="input"
-                      name="newPassword"
-                      id="newPassword"
-                    />
-
-                    <label htmlFor="confirmPassword">CONFIRM PASSWORD</label>
-                    <input
-                      type="password"
-                      placeholder="Enter confirm password"
-                      value={changePasswordDetails.confirmPassword}
-                      onChange={handleChange}
-                      required
-                      className="input"
-                      name="confirmPassword"
-                      id="confirmPassword  "
-                    />
-
-                    <div className="auth-btn-links">
-                      <button type="submit" className="primary-button">
-                        {isLoading ? (
-                          <TbLoader size={30} className="loader" />
-                        ) : (
-                          "Save"
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() => {
-                          setChangePasswordModal(false);
-                          setChangePasswordDetails({
-                            oldPassword: "",
-                            newPassword: "",
-                            confirmPassword: "",
-                          });
-                        }}
+                  <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
+                    <Box visibleFrom="sm" maw={160} style={{ minWidth: 0 }}>
+                      <Text
+                        fz="0.85rem"
+                        fw={600}
+                        lineClamp={1}
+                        style={{ whiteSpace: "nowrap" }}
                       >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </motion.div>
-              </>
-            ) : null}
-          </AnimatePresence>
-        </div>
-      )}
-    </div>
+                        {displayName}
+                      </Text>
+                    </Box>
+                    <UserAvatar
+                      name={userData?.name || "User"}
+                      src={userLogo}
+                      size={36}
+                      online
+                    />
+                  </Group>
+                </UnstyledButton>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Label>
+                  <Group gap="xs" wrap="nowrap">
+                    <UserAvatar
+                      name={userData?.name || "User"}
+                      src={userLogo}
+                      size={38}
+                    />
+                    <Box style={{ minWidth: 0 }}>
+                      <Text fw={600} fz="sm" lineClamp={1}>
+                        {displayName}
+                      </Text>
+                      <Text fz="xs" c="dimmed" lineClamp={1}>
+                        {userData?.email}
+                      </Text>
+                    </Box>
+                  </Group>
+                </Menu.Label>
+                <Menu.Divider />
+                <Menu.Item
+                  leftSection={<RiLockPasswordFill size={18} />}
+                  onClick={() => setIsChangePasswordOpen(true)}
+                >
+                  Change Password
+                </Menu.Item>
+                <Menu.Item
+                  color="red"
+                  disabled={isLoading}
+                  leftSection={<LuLogOut size={18} />}
+                  onClick={handleLogout}
+                >
+                  Sign out
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          )}
+        </Group>
+      </Flex>
+
+      <Modal
+        opened={isChangePasswordOpen}
+        onClose={closeChangePassword}
+        title={
+          <Group gap="xs" wrap="nowrap">
+            <ThemeIcon variant="light" size="md">
+              <RiLockPasswordFill size={16} />
+            </ThemeIcon>
+            <Text fw={700}>Change password</Text>
+          </Group>
+        }
+        size="sm"
+        fullScreen={isMobile}
+        centered={!isMobile}
+        padding="lg"
+      >
+        <form onSubmit={handleSubmit} noValidate>
+          <Stack gap="md">
+            <AuthField
+              id="oldPassword"
+              name="oldPassword"
+              label="Current password"
+              placeholder="Enter current password"
+              value={changePasswordDetails.oldPassword}
+              onChange={handleChange}
+              isPassword
+              autoComplete="current-password"
+            />
+
+            <AuthField
+              id="newPassword"
+              name="newPassword"
+              label="New password"
+              placeholder="Enter new password"
+              value={changePasswordDetails.newPassword}
+              onChange={handleChange}
+              isPassword
+              autoComplete="new-password"
+            />
+
+            <AuthField
+              id="confirmPassword"
+              name="confirmPassword"
+              label="Confirm password"
+              placeholder="Re-enter new password"
+              value={changePasswordDetails.confirmPassword}
+              onChange={handleChange}
+              isPassword
+              autoComplete="new-password"
+            />
+
+            <Divider my={4} />
+
+            <Group grow gap="sm">
+              <Button type="submit" loading={isLoading} fullWidth>
+                Save changes
+              </Button>
+              <Button
+                type="button"
+                variant="light"
+                color="gray"
+                fullWidth
+                onClick={closeChangePassword}
+              >
+                Cancel
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Modal>
+    </>
   );
 };
 
