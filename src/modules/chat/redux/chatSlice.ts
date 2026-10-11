@@ -109,19 +109,26 @@ const chatSlice = createSlice({
     },
     updateUserPresence: (
       state,
-      action: { payload: { userId: string; isOnline: boolean } }
+      action: {
+        payload: { userId: string; isOnline: boolean; lastSeen?: string };
+      }
     ) => {
-      const { userId, isOnline } = action.payload;
+      const { userId, isOnline, lastSeen } = action.payload;
       const current = new Set(state.onlineUserIds);
       if (isOnline) current.add(userId);
       else current.delete(userId);
       state.onlineUserIds = Array.from(current);
 
+      const patch = {
+        isOnline,
+        ...(lastSeen ? { lastSeen } : {}),
+      };
+
       state.allUsers = state.allUsers.map((u) =>
-        u.id === userId ? { ...u, isOnline } : u
+        u.id === userId ? { ...u, ...patch } : u
       );
       if (state.selectedUser?.id === userId) {
-        state.selectedUser = { ...state.selectedUser, isOnline };
+        state.selectedUser = { ...state.selectedUser, ...patch };
       }
     },
     resetChatState: (state) => {

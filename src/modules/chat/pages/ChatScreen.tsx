@@ -57,9 +57,15 @@ const ChatScreen = () => {
       }
     };
 
-    const handleOffline = (data: { userId: string }) => {
+    const handleOffline = (data: { userId: string; lastSeen?: string }) => {
       if (data?.userId) {
-        dispatch(updateUserPresence({ userId: data.userId, isOnline: false }));
+        dispatch(
+          updateUserPresence({
+            userId: data.userId,
+            isOnline: false,
+            ...(data.lastSeen ? { lastSeen: data.lastSeen } : {}),
+          }),
+        );
       }
     };
 

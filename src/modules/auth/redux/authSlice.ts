@@ -25,6 +25,7 @@ export interface TUserData {
   name: string;
   id: string;
   profileImage?: TProfileImage;
+  lastSeen?: string | null;
 }
 
 export interface TAuthState {

@@ -26,7 +26,7 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import UserAvatar from "@components/UserAvatar";
-import { dayKey, formatDayLabel } from "@utils/format";
+import { dayKey, formatDayLabel, formatLastSeen } from "@utils/format";
 
 type ChatSectionProps = {
   onOpenUserList: () => void;
@@ -262,12 +262,19 @@ const ChatSection = ({
             <Text fw={700} fz="0.95rem" lineClamp={1}>
               {selectedUser?.name ?? "Orbither"}
             </Text>
-            <Text fz="xs" c="dimmed" lineClamp={1}>
+            <Text
+              fz="xs"
+              c={(selectedUser as any)?.isOnline ? "teal" : "dimmed"}
+              lineClamp={1}
+            >
               {typingName
                 ? `${typingName} is typing…`
-                : selectedUser
-                  ? selectedUser.email
-                  : "Pick a conversation to start"}
+                : !selectedUser
+                  ? "Pick a conversation to start"
+                  : (selectedUser as any).isOnline
+                    ? "Online"
+                    : formatLastSeen((selectedUser as any).lastSeen) ||
+                      selectedUser.email}
             </Text>
           </Box>
         </Group>

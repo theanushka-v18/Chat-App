@@ -66,6 +66,12 @@ export const formatRelative = (value: TimeValue): string => {
   return formatDayLabel(date);
 };
 
+/** "Last seen just now" / "Last seen 12m ago" / "" when unknown */
+export const formatLastSeen = (value: TimeValue): string => {
+  const relative = formatRelative(value);
+  return relative ? `Last seen ${relative}` : "";
+};
+
 /** 1200 -> "1.2k" */
 export const formatCount = (value: number): string => {
   if (value < 1000) return String(value);

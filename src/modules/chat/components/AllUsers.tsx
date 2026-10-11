@@ -16,6 +16,7 @@ import { LuSearch, LuUserPlus, LuX } from "react-icons/lu";
 import { useAppSelector } from "@redux/hooks";
 import type { TUserData } from "@modules/auth/redux/authSlice";
 import UserAvatar from "@components/UserAvatar";
+import { formatLastSeen } from "@utils/format";
 import UserShimmerBox from "./UserShimmerBox";
 
 interface IAllUsersProps {
@@ -189,8 +190,15 @@ const AllUsers = ({
                         </Badge>
                       )}
                     </Group>
-                    <Text fz="xs" c="dimmed" lineClamp={1} visibleFrom="xs">
-                      {user.email}
+                    <Text
+                      fz="xs"
+                      c={(user as any).isOnline ? "teal" : "dimmed"}
+                      lineClamp={1}
+                      visibleFrom="xs"
+                    >
+                      {(user as any).isOnline
+                        ? "Online"
+                        : formatLastSeen((user as any).lastSeen) || user.email}
                     </Text>
                   </Box>
                 </Group>
