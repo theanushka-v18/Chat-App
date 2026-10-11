@@ -1,21 +1,25 @@
 // src/components/ProtectedRoute.tsx
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { setIsAuthenticated } from "@modules/auth/redux/authSlice";
 import type React from "react";
 import type { RootState } from "@redux/store";
 import { RoutePaths } from "@/api/RoutePaths";
-import { useEffect } from "react";
+import { Center, Loader } from "@mantine/core";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const dispatch = useDispatch();
-  const { accessToken } = useSelector((state: RootState) => state.auth);
+  const { accessToken, isInitialized } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
-  useEffect(() => {
-    if (accessToken) {
-      dispatch(setIsAuthenticated(true));
-    }
-  }, [accessToken, dispatch]);
+  // Wait for the startup session restore before deciding — prevents the
+  // "logged out on refresh" flash/redirect before bootstrapAuth resolves.
+  if (!isInitialized) {
+    return (
+      <Center h="60dvh">
+        <Loader size="lg" />
+      </Center>
+    );
+  }
 
   if (!accessToken) {
     // If not logged in → redirect to login

@@ -1,6 +1,19 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { apiClient } from "@services/apiService";
+import { apiClient, refreshAccessToken } from "@services/apiService";
 import { authEndpoints } from "@modules/auth/api/authEndpoints";
+
+const STORAGE_KEYS = {
+  accessToken: "accessToken",
+  userData: "userData",
+} as const;
+
+const persistUser = (user: TUserData | null) => {
+  if (user) {
+    localStorage.setItem(STORAGE_KEYS.userData, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(STORAGE_KEYS.userData);
+  }
+};
 
 export interface TProfileImage {
   url?: string;
@@ -19,6 +32,8 @@ export interface TAuthState {
   isAuthenticated: boolean;
   accessToken: string | null;
   isLoading: boolean;
+  /** True once we've attempted to restore the session on startup. */
+  isInitialized: boolean;
 }
 
 export const initialState: TAuthState = {
@@ -30,7 +45,49 @@ export const initialState: TAuthState = {
   isAuthenticated: false,
   accessToken: "",
   isLoading: false,
+  isInitialized: false,
 };
+
+/**
+ * Restore the session on app startup.
+ * - Reuses the access token from localStorage when present.
+ * - Otherwise (or when it has expired) exchanges the httpOnly refresh cookie
+ *   for a new access token via the existing /refresh endpoint.
+ * - Rehydrates the cached user profile so UI does not flash empty state.
+ */
+export const bootstrapAuth = createAsyncThunk("bootstrapAuth", async () => {
+  let user: TUserData | null = null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.userData);
+    user = raw ? (JSON.parse(raw) as TUserData) : null;
+  } catch {
+    user = null;
+  }
+
+  let accessToken = localStorage.getItem(STORAGE_KEYS.accessToken);
+
+  // Try the refresh cookie first so a page reload gets a valid, fresh token.
+  try {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) accessToken = refreshed;
+  } catch {
+    // No valid refresh session; fall back to any stored access token.
+  }
+
+  // If we have a token but no cached profile (e.g. first load after an
+  // upgrade), fetch it so the UI is not stuck on an empty user.
+  if (!user && accessToken) {
+    try {
+      const res = await apiClient.get(authEndpoints.ME);
+      user = (res.data?.user ?? res.data) as TUserData;
+      persistUser(user);
+    } catch {
+      // Ignore: token may still be usable; profile can load later.
+    }
+  }
+
+  return { accessToken: accessToken || null, user };
+});
 
 export const signup = createAsyncThunk(
   "signup",
@@ -51,8 +108,9 @@ export const signup = createAsyncThunk(
       });
       const { user, accessToken, message } = response.data;
 
-      // save access token locally
-      localStorage.setItem("accessToken", accessToken);
+      // save access token + profile locally so a refresh can restore the session
+      localStorage.setItem(STORAGE_KEYS.accessToken, accessToken);
+      persistUser(user);
       return { user, accessToken, message };
     } catch (error: any) {
       throw new Error(error.response.data.message);
@@ -70,8 +128,9 @@ export const login = createAsyncThunk(
       });
       const { accessToken, user, message } = response.data;
 
-      // save access token locally
-      localStorage.setItem("accessToken", accessToken);
+      // save access token + profile locally so a refresh can restore the session
+      localStorage.setItem(STORAGE_KEYS.accessToken, accessToken);
+      persistUser(user);
       return { accessToken, user, message };
     } catch (error: any) {
       throw new Error(error.response.data.message);
@@ -82,7 +141,8 @@ export const login = createAsyncThunk(
 export const logout = createAsyncThunk("logout", async () => {
   const response = await apiClient.post(authEndpoints.SIGNOUT);
   const { message } = response.data;
-  localStorage.removeItem("accessToken");
+  localStorage.removeItem(STORAGE_KEYS.accessToken);
+  persistUser(null);
   return { message };
 });
 
@@ -158,6 +218,7 @@ export const uploadProfileImage = createAsyncThunk(
         { headers: { "Content-Type": "multipart/form-data" } },
       );
       const { user, message } = response.data;
+      persistUser(user);
       return { user, message };
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "Upload failed");
@@ -176,17 +237,38 @@ const authSlice = createSlice({
       state.userData = null;
       state.accessToken = null;
       state.isAuthenticated = false;
-      localStorage.removeItem("accessToken");
+      state.isInitialized = true;
+      localStorage.removeItem(STORAGE_KEYS.accessToken);
+      persistUser(null);
     },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(bootstrapAuth.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(bootstrapAuth.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isInitialized = true;
+        state.accessToken = action.payload.accessToken;
+        state.isAuthenticated = Boolean(action.payload.accessToken);
+        if (action.payload.user) {
+          state.userData = action.payload.user;
+        }
+      })
+      .addCase(bootstrapAuth.rejected, (state) => {
+        state.isLoading = false;
+        state.isInitialized = true;
+        state.isAuthenticated = false;
+      })
       .addCase(login.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.userData = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.isAuthenticated = true;
+        state.isInitialized = true;
         state.isLoading = false;
       })
       .addCase(login.rejected, (state) => {
@@ -198,6 +280,8 @@ const authSlice = createSlice({
       .addCase(signup.fulfilled, (state, action) => {
         state.userData = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.isAuthenticated = true;
+        state.isInitialized = true;
         state.isLoading = false;
       })
       .addCase(signup.rejected, (state) => {

@@ -1,15 +1,34 @@
 import axios from "axios";
 
+export const API_BASE_URL =
+  import.meta.env.VITE_BASE_URL ||
+  "https://chat-app-backend-u15o.onrender.com/api";
+
 export const apiClient = axios.create({
-  baseURL:
-    import.meta.env.VITE_BASE_URL ||
-    "https://chat-app-backend-u15o.onrender.com/api",
-  // baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3000/api',
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
+
+/**
+ * Exchange the httpOnly refresh-token cookie for a fresh access token.
+ * Uses a bare axios call (not `apiClient`) so a failed refresh cannot
+ * trigger the response interceptor and create a redirect/retry loop.
+ */
+export const refreshAccessToken = async (): Promise<string> => {
+  const res = await axios.post(
+    `${API_BASE_URL}/refresh`,
+    {},
+    { withCredentials: true },
+  );
+  const newAccessToken: string = res.data.accessToken;
+  if (newAccessToken) {
+    localStorage.setItem("accessToken", newAccessToken);
+  }
+  return newAccessToken;
+};
 
 apiClient.interceptors.request.use(
   (config) => {
@@ -33,28 +52,18 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const baseURL =
-          import.meta.env.VITE_BASE_URL ||
-          "https://chat-app-backend-u15o.onrender.com/api";
-        const refreshURL = baseURL.replace(/\/api$/, "") + "/api/refresh";
-        const res = await axios.post(
-          refreshURL,
-          {},
-          {
-            withCredentials: true,
-          }
-        );
-        const newAccessToken = res.data.accessToken;
-
-        // save new token
-        localStorage.setItem("accessToken", newAccessToken);
+        const newAccessToken = await refreshAccessToken();
 
         // update header and retry request
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
         return apiClient(originalRequest);
-      } catch (error) {
-        console.error("Refresh token failed", error);
-        window.location.href = "/"; // redirect to login
+      } catch (refreshError) {
+        console.error("Refresh token failed", refreshError);
+        localStorage.removeItem("accessToken");
+        // Only bounce to login once, and never loop on the login route itself.
+        if (window.location.pathname !== "/") {
+          window.location.href = "/";
+        }
       }
     }
 
