@@ -161,11 +161,12 @@ const AllUsers = ({
                 }}
               >
                 <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                  <UserAvatar
-                    name={user.name}
-                    src={user.profileImage?.url ?? null}
-                    size={42}
-                  />
+                   <UserAvatar
+                     name={user.name}
+                     src={user.profileImage?.url ?? null}
+                     size={42}
+                     online={(user as any).isOnline}
+                   />
                   <Box style={{ flex: 1, minWidth: 0 }}>
                     <Group gap="xs" wrap="nowrap" justify="space-between">
                       <Text

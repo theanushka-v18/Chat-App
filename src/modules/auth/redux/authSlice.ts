@@ -83,6 +83,7 @@ export const logout = createAsyncThunk("logout", async () => {
   const response = await apiClient.post(authEndpoints.SIGNOUT);
   const { message } = response.data;
   localStorage.removeItem("accessToken");
+  return { message };
 });
 
 export const changePassword = createAsyncThunk(
@@ -175,7 +176,7 @@ const authSlice = createSlice({
       state.userData = null;
       state.accessToken = null;
       state.isAuthenticated = false;
-      localStorage.clear();
+      localStorage.removeItem("accessToken");
     },
   },
   extraReducers: (builder) => {

@@ -109,12 +109,15 @@ const ChatSection = ({
     socket.on("receive_message", (data) => {
       const isCurrentChat =
         (data.sender === selectedUser?.id && data.receiver === userData?.id) ||
-        (data.receiver === selectedUser?.id && data.sender === userData?.id);
+        (data.receiver === selectedUser?.id && data.sender === userData?.id) ||
+        (data.sender === userData?.id && data.receiver === selectedUser?.id);
 
       if (isCurrentChat) {
         setChats((prev) => [...prev, data]);
       } else {
-        dispatch(incrementUnread(data.sender));
+        if (data.sender && data.sender !== userData?.id) {
+          dispatch(incrementUnread(data.sender));
+        }
 
         if (Notification.permission === "granted") {
           const notification = new Notification(
@@ -242,13 +245,14 @@ const ChatSection = ({
             </ActionIcon>
           </Box>
 
-          {selectedUser ? (
-            <UserAvatar
-              name={selectedUser.name}
-              src={selectedUser.profileImage?.url ?? null}
-              size={38}
-            />
-          ) : (
+           {selectedUser ? (
+             <UserAvatar
+               name={selectedUser.name}
+               src={selectedUser.profileImage?.url ?? null}
+               size={38}
+               online={(selectedUser as any).isOnline}
+             />
+           ) : (
             <ThemeIcon size={38} radius="xl" variant="light">
               <LuMessageCircle size={20} />
             </ThemeIcon>

@@ -12,12 +12,13 @@ export interface TChatMessage {
 }
 
 export interface TChatState {
-  allUsers: TUserData[];
-  selectedUser: TUserData | null;
+  allUsers: (TUserData & { isOnline?: boolean })[];
+  selectedUser: (TUserData & { isOnline?: boolean }) | null;
   chatHistory: TChatMessage[];
   isChatLoading: boolean;
   isUsersLoading: boolean;
   unreadCounts: Record<string, number>; // {userId: count}
+  onlineUserIds: string[];
 }
 
 const initialState: TChatState = {
@@ -27,7 +28,13 @@ const initialState: TChatState = {
   isChatLoading: false,
   isUsersLoading: false,
   unreadCounts: {}, // {userId: count}
+  onlineUserIds: [],
 };
+
+const withPresence = <T extends TUserData & { isOnline?: boolean }>(
+  user: T,
+  onlineIds: Set<string>,
+): T => ({ ...user, isOnline: onlineIds.has(user.id) });
 
 export const getAllUsers = createAsyncThunk<
   { users: TUserData[] },
@@ -73,18 +80,56 @@ const chatSlice = createSlice({
   reducers: {
     incrementUnread: (state, action) => {
       const userId = action.payload;
+      if (!userId) return;
       state.unreadCounts[userId] = (state.unreadCounts[userId] || 0) + 1;
     },
     clearUnread: (state, action) => {
       const userId = action.payload;
+      if (!userId) return;
       state.unreadCounts[userId] = 0;
     },
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
       // clear unread when switching to this chat
-      if (action.payload) {
+      if (action.payload?.id) {
         state.unreadCounts[action.payload.id] = 0;
       }
+    },
+    setPresence: (
+      state,
+      action: { payload: { onlineUserIds: string[] } }
+    ) => {
+      state.onlineUserIds = action.payload.onlineUserIds || [];
+      const onlineSet = new Set(state.onlineUserIds);
+      state.allUsers = state.allUsers.map((u) => withPresence(u, onlineSet));
+      // If selected user exists, ensure presence is reflected
+      if (state.selectedUser) {
+        state.selectedUser = withPresence(state.selectedUser, onlineSet);
+      }
+    },
+    updateUserPresence: (
+      state,
+      action: { payload: { userId: string; isOnline: boolean } }
+    ) => {
+      const { userId, isOnline } = action.payload;
+      const current = new Set(state.onlineUserIds);
+      if (isOnline) current.add(userId);
+      else current.delete(userId);
+      state.onlineUserIds = Array.from(current);
+
+      state.allUsers = state.allUsers.map((u) =>
+        u.id === userId ? { ...u, isOnline } : u
+      );
+      if (state.selectedUser?.id === userId) {
+        state.selectedUser = { ...state.selectedUser, isOnline };
+      }
+    },
+    resetChatState: (state) => {
+      state.allUsers = [];
+      state.selectedUser = null;
+      state.chatHistory = [];
+      state.unreadCounts = {};
+      state.onlineUserIds = [];
     },
   },
   extraReducers: (builder) => {
@@ -94,7 +139,10 @@ const chatSlice = createSlice({
       })
       .addCase(getAllUsers.fulfilled, (state, action) => {
         state.isUsersLoading = false;
-        state.allUsers = action.payload.users;
+        const onlineSet = new Set(state.onlineUserIds);
+        state.allUsers = action.payload.users.map((u) =>
+          withPresence(u, onlineSet),
+        );
       })
       .addCase(getAllUsers.rejected, (state) => {
         state.isUsersLoading = false;
@@ -112,6 +160,12 @@ const chatSlice = createSlice({
   },
 });
 
-export const { setSelectedUser, clearUnread, incrementUnread } =
-  chatSlice.actions;
+export const {
+  setSelectedUser,
+  clearUnread,
+  incrementUnread,
+  setPresence,
+  updateUserPresence,
+  resetChatState,
+} = chatSlice.actions;
 export default chatSlice.reducer;

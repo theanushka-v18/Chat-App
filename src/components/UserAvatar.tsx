@@ -36,16 +36,35 @@ const UserAvatar = ({
       {online && (
         <Box
           pos="absolute"
-          bottom={0}
-          right={0}
+          bottom={-1}
+          right={-1}
           w={dotSize}
           h={dotSize}
-          style={{
-            borderRadius: "50%",
-            backgroundColor: "var(--app-online)",
-            border: "2px solid var(--app-surface)",
-          }}
-        />
+          role="img"
+          aria-label={`${name} is online`}
+        >
+          {/* expanding halo ring */}
+          <Box
+            className="app-presence-ring"
+            pos="absolute"
+            inset={0}
+            style={{
+              borderRadius: "50%",
+              backgroundColor: "var(--app-online)",
+            }}
+          />
+          {/* solid status badge */}
+          <Box
+            pos="absolute"
+            inset={0}
+            style={{
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #4ade80 0%, #16a34a 100%)",
+              border: "2px solid var(--app-surface)",
+              boxShadow: "0 0 6px rgba(34, 197, 94, 0.7)",
+            }}
+          />
+        </Box>
       )}
     </Box>
   );

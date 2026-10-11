@@ -33,10 +33,14 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
+        const baseURL =
+          import.meta.env.VITE_BASE_URL ||
+          "https://chat-app-backend-u15o.onrender.com/api";
+        const refreshURL = baseURL.replace(/\/api$/, "") + "/api/refresh";
         const res = await axios.post(
-          "https://chat-app-backend-u15o.onrender.com/api/refresh",
+          refreshURL,
+          {},
           {
-            // const res = await axios.post("http://localhost:3000/api/refresh", {
             withCredentials: true,
           }
         );

@@ -3,6 +3,9 @@ import { useAppDispatch, useAppSelector } from "@redux/hooks";
 import {
   getAllUsers,
   setSelectedUser,
+  setPresence,
+  updateUserPresence,
+  resetChatState,
   type TChatMessage,
 } from "@modules/chat/redux/chatSlice";
 import type { TUserData } from "@modules/auth/redux/authSlice";
@@ -35,22 +38,52 @@ const ChatScreen = () => {
     dispatch(getAllUsers({ name: userData.name }));
   }, [dispatch, userData?.id, userData?.name]);
 
-  // Join our room so io.to(userId).emit(...) actually reaches this socket.
-  // Re-run on reconnect: rooms are server-side and die with the connection.
+  // Connect socket when authenticated user is ready
   useEffect(() => {
     if (!userData?.id) return;
 
-    const join = () => socket.emit("join", userData.id);
-    if (socket.connected) join();
-    socket.on("connect", join);
+    const handleConnect = () => {
+      // Server handles identity; ensure auth token is up to date on reconnect
+      socket.auth = { token: localStorage.getItem("accessToken") };
+    };
+
+    const handleInitialPresence = (data: { online: string[] }) => {
+      dispatch(setPresence({ onlineUserIds: data.online || [] }));
+    };
+
+    const handleOnline = (data: { userId: string }) => {
+      if (data?.userId) {
+        dispatch(updateUserPresence({ userId: data.userId, isOnline: true }));
+      }
+    };
+
+    const handleOffline = (data: { userId: string }) => {
+      if (data?.userId) {
+        dispatch(updateUserPresence({ userId: data.userId, isOnline: false }));
+      }
+    };
+
+    // Register listeners BEFORE connecting so we never miss presence:initial.
+    socket.on("connect", handleConnect);
+    socket.on("presence:initial", handleInitialPresence);
+    socket.on("presence:online", handleOnline);
+    socket.on("presence:offline", handleOffline);
+
+    // Update auth token before connecting in case it changed
+    socket.auth = { token: localStorage.getItem("accessToken") };
+    socket.connect();
 
     return () => {
-      socket.off("connect", join);
+      socket.off("connect", handleConnect);
+      socket.off("presence:initial", handleInitialPresence);
+      socket.off("presence:online", handleOnline);
+      socket.off("presence:offline", handleOffline);
+      socket.disconnect();
     };
-  }, [userData?.id]);
+  }, [userData?.id, dispatch]);
 
   const handleSelectUser = (user: TUserData) => {
-    dispatch(setSelectedUser(user));
+    dispatch(setSelectedUser(user as any));
     setIsUserListOpen(false);
   };
 
